@@ -18,17 +18,28 @@
 #include <DallasTemperature.h>
 #include <OpenTherm.h>
 
-//WiFi parameters
+//WiFi parameters Hulst
 #ifndef STASSID
-#define STASSID "Kievit"       // Enter your Wi-Fi SSID here
-#define STAPSK  "js231240"     // Enter your Wi-Fi password here
+//-------Production
+//#define STASSID "Kievit"               // Enter your Wi-Fi SSID here
+//#define STAPSK  "js231240"             // Enter your Wi-Fi password here
+//----------Testing
+#define STASSID "Icenet"                 // Enter your Wi-Fi SSID here
+#define STAPSK  "sukhumviticemarioplus"  // Enter your Wi-Fi password here
+
 #endif
 
 //MQTT parameters
-const char* mqtt_server   = "192.168.11.25";   // Enter your MQTT broker IP or FQDN here
-const int   mqtt_port     = 1883;              // Enter your MQTT port number here (Note: No secure port supported)
-const char* mqtt_user     = "smartbroker";     // Enter your MQTT Broker username here
-const char* mqtt_password = "kievit@hulst";    // Enter your MQTT Broker password here
+//--------Prodcution
+//const char* mqtt_server   = "192.168.11.25";     // Enter your MQTT broker IP or FQDN here
+//const int   mqtt_port     = 1883;                // Enter your MQTT port number here (Note: No secure port supported)
+//const char* mqtt_user     = "smartbroker";       // Enter your MQTT Broker username here
+//const char* mqtt_password = "kievit@hulst";      // Enter your MQTT Broker password here
+//--------Testing
+const char* mqtt_server   = "mqtt.blocs-77.com";   // Enter your MQTT broker IP or FQDN here
+const int   mqtt_port     = 1883;                  // Enter your MQTT port number here (Note: No secure port supported)
+const char* mqtt_user     = "smartbroker";         // Enter your MQTT Broker username here
+const char* mqtt_password = "4smart@home";         // Enter your MQTT Broker password here
 
 //OpenTherm input and output wires connected to 4 and 5 pins on the OpenTherm Shield
 const int inPin = 12;  //for Arduino, 12 for ESP8266 (D6), 19 for ESP32
@@ -66,12 +77,12 @@ double dhw_temperature = 0;                 // Default =  0, updated with MQTT t
 
 //DEBUG MESSAGE SETTING
 const char* serial_monitor = "1";           // Default = 0, if set to 1 the OpenTherm traffic will be shown on the serial monitor
-const char* serial_mqtt    = "0";           // Default = 0, if set to 1 all MQTT related debug messages are shown on the serial terminal
+const char* serial_mqtt    = "1";           // Default = 0, if set to 1 all MQTT related debug messages are shown on the serial terminal
 const char* serial_range   = "0";           // Default = 0, if set to 1 all range check debug messages are shown on the serial terminal
-const char* serial_update  = "0";           // Default = 0, is set to 1 all value updates are shown on the serial terminal
+const char* serial_update  = "1";           // Default = 0, is set to 1 all value updates are shown on the serial terminal
 const char* serial_convert = "0";           // Default = 0, if set to 1 all value to hex conversion debug messages are shown on the serial terminal
-const char* serial_onewire = "0";           // Default = 0, if set to 1 the system will print a list of device addresses to the terminal
-const char* serial_debug   = "0";           // Default = 0, if set to 1 debug messages are shown on the serial monitor
+const char* serial_onewire = "1";           // Default = 0, if set to 1 the system will print a list of device addresses to the terminal
+const char* serial_debug   = "1";           // Default = 0, if set to 1 debug messages are shown on the serial monitor
 
 
 
@@ -1286,7 +1297,7 @@ void loop() {
 
   //Read temperature every 5 seconds
   unsigned long now = millis();
-  if (now - last_temp > 5000) {open
+  if (now - last_temp > 5000) {
     read_temperature();
     last_temp = millis();
   }
