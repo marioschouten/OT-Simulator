@@ -17,6 +17,10 @@
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #include <OpenTherm.h>
+#include <ESPAsyncTCP.h>
+#include <ESPAsyncWebServer.h>
+#include <AsyncElegantOTA.h>
+
 
 //WiFi parameters Hulst
 #ifndef STASSID
@@ -91,6 +95,8 @@ const char* serial_debug   = "1";           // Default = 0, if set to 1 debug me
 //Init WiFi
 const char* ssid     = STASSID;
 const char* password = STAPSK;
+AsyncWebServer server(80);
+
 
 //Set espClient to Wifi
 WiFiClient espClient;
@@ -378,6 +384,15 @@ void setup_wifi() {
     Serial.print(WiFi.localIP());
     Serial.println();
   }
+
+  //OTA Routine
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(200, "text/plain", "Hi! I am ESP8266.");
+  });
+
+  AsyncElegantOTA.begin(&server);    // Start ElegantOTA
+  server.begin();
+  Serial.println("HTTP server started");
 
   //Switch ON the LED
   digitalWrite(LED_BUILTIN, LOW);   // turn the LED on (HIGH is the voltage level)
@@ -1252,6 +1267,14 @@ void setup()
   //Start onewire library
   sensors.begin();
 
+  //OTA 
+
+
+
+
+
+
+
   // locate onewire devices on the bus and print to terminal
   if (strcmp(serial_onewire, "1") == 0 ) {
     //Locating onewire addresses
@@ -1291,6 +1314,9 @@ void loop() {
     //Reconnect
     reconnect();
   } 
+
+  //OTA loop
+  AsyncElegantOTA.loop();
 
   //OpenTerm process
   ot.process();
