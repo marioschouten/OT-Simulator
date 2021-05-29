@@ -1199,16 +1199,26 @@ void processRequest(unsigned long request, OpenThermResponseStatus status) {
     } else {
       msg_full = "0";
       snprintf (msg, MSG_BUFFER_SIZE, msg_full.c_str());
-      client.publish("thermostat/ch_enabled", msg);
+      client.publish("thermostat/ch_requested", msg);
     }
   } 
 
   //Publish the modulation level to MQTT [thermostat/modulation]
-  if ( (ch_enabled == 1) && (msg_id == "11") ) {
-    msg_full = msg_value;
-    snprintf (msg, MSG_BUFFER_SIZE, msg_full.c_str());
-    client.publish("thermostat/modulation", msg);
-  }
+  msg_full = msg_value;
+  snprintf (msg, MSG_BUFFER_SIZE, msg_full.c_str());
+  client.publish("thermostat/modulation", msg);
+
+ //Publish the boiler temperature to MQTT [thermostat/boilertemp]
+  msg_full = heater_temp;
+  snprintf (msg, MSG_BUFFER_SIZE, msg_full.c_str());
+  client.publish("thermostat/boilertemp", msg);
+
+ //Publish the boiler returntemperature to MQTT [thermostat/returntemp]
+  msg_full = return_temp;
+  snprintf (msg, MSG_BUFFER_SIZE, msg_full.c_str());
+  client.publish("thermostat/returntemp", msg);
+
+
 
   //Initializing base value to 1, i.e 16^0, set the variable length fixed to 4 and the dec_val to 0
   int base = 1;  int len = 8; unsigned long dec_val = 0;
