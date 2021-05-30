@@ -25,25 +25,25 @@
 //WiFi parameters Hulst
 #ifndef STASSID
 //-------Production
-//#define STASSID "Kievit"               // Enter your Wi-Fi SSID here
-//#define STAPSK  "js231240"             // Enter your Wi-Fi password here
+#define STASSID "Kievit"               // Enter your Wi-Fi SSID here
+#define STAPSK  "js231240"             // Enter your Wi-Fi password here
 //----------Testing
-#define STASSID "Icenet"                 // Enter your Wi-Fi SSID here
-#define STAPSK  "sukhumviticemarioplus"  // Enter your Wi-Fi password here
+//#define STASSID "Icenet"                 // Enter your Wi-Fi SSID here
+//#define STAPSK  "sukhumviticemarioplus"  // Enter your Wi-Fi password here
 
 #endif
 
 //MQTT parameters
 //--------Prodcution
-//const char* mqtt_server   = "192.168.11.25";     // Enter your MQTT broker IP or FQDN here
-//const int   mqtt_port     = 1883;                // Enter your MQTT port number here (Note: No secure port supported)
-//const char* mqtt_user     = "smartbroker";       // Enter your MQTT Broker username here
-//const char* mqtt_password = "kievit@hulst";      // Enter your MQTT Broker password here
+const char* mqtt_server   = "192.168.11.25";     // Enter your MQTT broker IP or FQDN here
+const int   mqtt_port     = 1883;                // Enter your MQTT port number here (Note: No secure port supported)
+const char* mqtt_user     = "smartbroker";       // Enter your MQTT Broker username here
+const char* mqtt_password = "kievit@hulst";      // Enter your MQTT Broker password here
 //--------Testing
-const char* mqtt_server   = "mqtt.blocs-77.com";   // Enter your MQTT broker IP or FQDN here
-const int   mqtt_port     = 1883;                  // Enter your MQTT port number here (Note: No secure port supported)
-const char* mqtt_user     = "smartbroker";         // Enter your MQTT Broker username here
-const char* mqtt_password = "4smart@home";         // Enter your MQTT Broker password here
+//const char* mqtt_server   = "mqtt.blocs-77.com";   // Enter your MQTT broker IP or FQDN here
+//const int   mqtt_port     = 1883;                  // Enter your MQTT port number here (Note: No secure port supported)
+//const char* mqtt_user     = "smartbroker";         // Enter your MQTT Broker username here
+//const char* mqtt_password = "4smart@home";         // Enter your MQTT Broker password here
 
 //OpenTherm input and output wires connected to 4 and 5 pins on the OpenTherm Shield
 const int inPin = 12;  //for Arduino, 12 for ESP8266 (D6), 19 for ESP32
@@ -976,6 +976,10 @@ void processRequest(unsigned long request, OpenThermResponseStatus status) {
           old_value = msg_value.toDouble();
           msg_value = String(heater_temp);
       }
+      //Publish the boiler temperature to MQTT [thermostat/boilertemp]
+      msg_full = heater_temp;
+      snprintf (msg, MSG_BUFFER_SIZE, msg_full.c_str());
+      client.publish("thermostat/boilertemp", msg);
     }
 
        //Check the ID 14 Max relative modulation
@@ -1026,6 +1030,10 @@ void processRequest(unsigned long request, OpenThermResponseStatus status) {
           old_value = msg_value.toDouble();
           msg_value = String(return_temp);
       }
+      //Publish the boiler returntemperature to MQTT [thermostat/returntemp]
+        msg_full = return_temp;
+        snprintf (msg, MSG_BUFFER_SIZE, msg_full.c_str());
+        client.publish("thermostat/returntemp", msg);
     }
  
  //Check the ID 56 DHW setpoint
@@ -1204,20 +1212,11 @@ void processRequest(unsigned long request, OpenThermResponseStatus status) {
   } 
 
   //Publish the modulation level to MQTT [thermostat/modulation]
-  msg_full = msg_value;
-  snprintf (msg, MSG_BUFFER_SIZE, msg_full.c_str());
-  client.publish("thermostat/modulation", msg);
-
- //Publish the boiler temperature to MQTT [thermostat/boilertemp]
-  msg_full = heater_temp;
-  snprintf (msg, MSG_BUFFER_SIZE, msg_full.c_str());
-  client.publish("thermostat/boilertemp", msg);
-
- //Publish the boiler returntemperature to MQTT [thermostat/returntemp]
-  msg_full = return_temp;
-  snprintf (msg, MSG_BUFFER_SIZE, msg_full.c_str());
-  client.publish("thermostat/returntemp", msg);
-
+  if ( msg_id == "11" ) {
+    msg_full = msg_value;
+    snprintf (msg, MSG_BUFFER_SIZE, msg_full.c_str());
+    client.publish("thermostat/modulation", msg);
+  }
 
 
   //Initializing base value to 1, i.e 16^0, set the variable length fixed to 4 and the dec_val to 0
