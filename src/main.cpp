@@ -25,8 +25,8 @@
 //WiFi parameters Hulst
 #ifndef STASSID
 //-------Production
-#define STASSID "Kievit"               // Enter your Wi-Fi SSID here
-#define STAPSK  "js231240"             // Enter your Wi-Fi password here
+#define STASSID "Kievit29"             // Enter your Wi-Fi SSID here
+#define STAPSK  "JanSchouten71"        // Enter your Wi-Fi password here
 //----------Testing
 //#define STASSID "Icenet"                 // Enter your Wi-Fi SSID here
 //#define STAPSK  "sukhumviticemarioplus"  // Enter your Wi-Fi password here
@@ -35,7 +35,7 @@
 
 //MQTT parameters
 //--------Prodcution
-const char* mqtt_server   = "192.168.11.25";     // Enter your MQTT broker IP or FQDN here
+const char* mqtt_server   = "192.168.11.26";     // Enter your MQTT broker IP or FQDN here
 const int   mqtt_port     = 1883;                // Enter your MQTT port number here (Note: No secure port supported)
 const char* mqtt_user     = "smartbroker";       // Enter your MQTT Broker username here
 const char* mqtt_password = "kievit@hulst";      // Enter your MQTT Broker password here
@@ -713,7 +713,7 @@ void processRequest(unsigned long request, OpenThermResponseStatus status) {
   String msg_value_follower   = "";
   String msg_received         = "";
   String msg_full             = "";
-  String msg_pos[8]           = "";
+  String msg_pos[8]           = {""};
 
   double old_value            = 0;
   double range_low            = 0;
