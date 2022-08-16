@@ -1,4 +1,4 @@
-//Version 1.0 by Mario M.C. Schouten Test
+//Version 1.1 by Mario M.C. Schouten Test
 //
 //Arduino Wemo D1 mini based E-C(entral)H(eating) follower using OpenTherm protocol and Ihor Melnyk's slave Terminal adapter for communication.
 //
