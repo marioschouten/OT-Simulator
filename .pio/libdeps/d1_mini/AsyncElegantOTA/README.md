@@ -4,7 +4,7 @@
 <p align="center">
 <img src="https://img.shields.io/github/last-commit/ayushsharma82/AsyncElegantOTA.svg?style=for-the-badge" />
 &nbsp;
-<img src="https://img.shields.io/travis/com/ayushsharma82/AsyncElegantOTA/master?style=for-the-badge" />
+<img src="https://img.shields.io/github/workflow/status/ayushsharma82/AsyncElegantOTA/Arduino%20Library%20CI/master?style=for-the-badge" />
 &nbsp;
 <img src="https://img.shields.io/github/license/ayushsharma82/AsyncElegantOTA.svg?style=for-the-badge" />
 &nbsp;
@@ -55,6 +55,36 @@ Download the [Repository](https://github.com/ayushsharma82/AsyncElegantOTA/archi
  
  Now copy the IPAddress displayed over your Serial Monitor and go to `http://<IPAddress>/update` in browser. ( where `<IPAddress>` is the IP of your ESP Module)
  
+ <br>
+ 
+ #### Additional Security:
+ 
+ If you would like to add login to your OTA webpage, then please replace `AsyncElegantOTA.begin(&server);` with `AsyncElegantOTA.begin(&server, "username", "password");`. This will prevent unauthorized requests to your OTA webpage and prevent unauthorized firmware upload to your MCU.
+ 
+<br>
+
+<b>Antivirus Issue:</b> If you have an antivirus on your PC with internet security, the progress bar on webpage will instantly show 100% because of request caching by your antivirus software. There is no fix for this unless you want to disable your antivirus or whitelist your local IP addresses in it. ( Same is the case with iOS, safari will cache the outgoing requests )
+
+<br>
+
+<h2>Tutorials</h2>
+<p>Tutorials for AsyncElegantOTA is live on RandomNerdTutorials.</p>
+
+<h3>ESP8266</h3> 
+<h4>Arduino IDE:</h4>
+<p>https://randomnerdtutorials.com/esp8266-nodemcu-ota-over-the-air-arduino/</p>
+<h4>PlatformIO:</h4>
+<p>https://randomnerdtutorials.com/esp8266-nodemcu-ota-over-the-air-vs-code/</p>
+<br>
+
+<h3>ESP32</h3>
+<h4>Arduino IDE:</h4>
+<p>https://randomnerdtutorials.com/esp32-ota-over-the-air-arduino/</p>
+<h4>PlatformIO:</h4>
+<p>https://randomnerdtutorials.com/esp32-ota-over-the-air-vs-code/</p>
+
+<br>
+ 
 <br>
 <h2>Examples</h2>
  
@@ -99,7 +129,6 @@ void setup(void) {
 }
 
 void loop(void) {
-  AsyncElegantOTA.loop();
 }
 
 ```
@@ -146,7 +175,6 @@ void setup(void) {
 }
 
 void loop(void) {
-  AsyncElegantOTA.loop();
 }
 
 ```

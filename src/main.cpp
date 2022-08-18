@@ -1,4 +1,4 @@
-//Version 1.1 by Mario M.C. Schouten Test
+//Version 1.2 by Mario M.C. Schouten
 //
 //Arduino Wemo D1 mini based E-C(entral)H(eating) follower using OpenTherm protocol and Ihor Melnyk's slave Terminal adapter for communication.
 //
@@ -27,9 +27,6 @@
 //-------Production
 #define STASSID "Kievit29"             // Enter your Wi-Fi SSID here
 #define STAPSK  "JanSchouten71"        // Enter your Wi-Fi password here
-//----------Testing
-//#define STASSID "Icenet"                 // Enter your Wi-Fi SSID here
-//#define STAPSK  "sukhumviticemarioplus"  // Enter your Wi-Fi password here
 
 #endif
 
@@ -39,11 +36,6 @@ const char* mqtt_server   = "192.168.11.26";     // Enter your MQTT broker IP or
 const int   mqtt_port     = 1883;                // Enter your MQTT port number here (Note: No secure port supported)
 const char* mqtt_user     = "smartbroker";       // Enter your MQTT Broker username here
 const char* mqtt_password = "kievit@hulst";      // Enter your MQTT Broker password here
-//--------Testing
-//const char* mqtt_server   = "mqtt.blocs-77.com";   // Enter your MQTT broker IP or FQDN here
-//const int   mqtt_port     = 1883;                  // Enter your MQTT port number here (Note: No secure port supported)
-//const char* mqtt_user     = "smartbroker";         // Enter your MQTT Broker username here
-//const char* mqtt_password = "4smart@home";         // Enter your MQTT Broker password here
 
 //OpenTherm input and output wires connected to 4 and 5 pins on the OpenTherm Shield
 const int inPin = 12;  //for Arduino, 12 for ESP8266 (D6), 19 for ESP32
@@ -82,10 +74,10 @@ double dhw_temperature = 0;                 // Default =  0, updated with MQTT t
 //DEBUG MESSAGE SETTING
 const char* serial_monitor = "1";           // Default = 0, if set to 1 the OpenTherm traffic will be shown on the serial monitor
 const char* serial_mqtt    = "1";           // Default = 0, if set to 1 all MQTT related debug messages are shown on the serial terminal
-const char* serial_range   = "0";           // Default = 0, if set to 1 all range check debug messages are shown on the serial terminal
+const char* serial_range   = "1";           // Default = 0, if set to 1 all range check debug messages are shown on the serial terminal
 const char* serial_update  = "1";           // Default = 0, is set to 1 all value updates are shown on the serial terminal
-const char* serial_convert = "0";           // Default = 0, if set to 1 all value to hex conversion debug messages are shown on the serial terminal
-const char* serial_onewire = "1";           // Default = 0, if set to 1 the system will print a list of device addresses to the terminal
+const char* serial_convert = "1";           // Default = 0, if set to 1 all value to hex conversion debug messages are shown on the serial terminal
+const char* serial_onewire = "0";           // Default = 0, if set to 1 the system will print a list of device addresses to the terminal
 const char* serial_debug   = "1";           // Default = 0, if set to 1 debug messages are shown on the serial monitor
 
 
@@ -1277,12 +1269,13 @@ void setup()
   sensors.begin();
 
   //OTA 
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(200, "text/plain", "Hi! I am ESP8266 on the KivietServer.");
+  });
 
-
-
-
-
-
+  AsyncElegantOTA.begin(&server);    // Start ElegantOTA
+  server.begin();
+  Serial.println("HTTP server started");
 
   // locate onewire devices on the bus and print to terminal
   if (strcmp(serial_onewire, "1") == 0 ) {
@@ -1323,9 +1316,6 @@ void loop() {
     //Reconnect
     reconnect();
   } 
-
-  //OTA loop
-  AsyncElegantOTA.loop();
 
   //OpenTerm process
   ot.process();

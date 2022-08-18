@@ -10,19 +10,12 @@
             "includePath": [
                 "c:/Users/mario_ecxszwi/OneDrive/CodeSource/OT-Simulator/include",
                 "c:/Users/mario_ecxszwi/OneDrive/CodeSource/OT-Simulator/src",
-<<<<<<< HEAD
                 "c:/Users/mario_ecxszwi/OneDrive/CodeSource/OT-Simulator/.pio/libdeps/d1_mini/OpenTherm Library/src",
-=======
->>>>>>> dfbcabcd944694e6e78d335ac2df003e60103819
                 "c:/Users/mario_ecxszwi/OneDrive/CodeSource/OT-Simulator/.pio/libdeps/d1_mini/ESP Async WebServer/src",
                 "c:/Users/mario_ecxszwi/OneDrive/CodeSource/OT-Simulator/.pio/libdeps/d1_mini/AsyncElegantOTA/src",
                 "C:/Users/mario_ecxszwi/.platformio/packages/framework-arduinoespressif8266/libraries/Hash/src",
                 "c:/Users/mario_ecxszwi/OneDrive/CodeSource/OT-Simulator/.pio/libdeps/d1_mini/ESPAsyncTCP/src",
                 "C:/Users/mario_ecxszwi/.platformio/packages/framework-arduinoespressif8266/libraries/ESP8266WiFi/src",
-<<<<<<< HEAD
-=======
-                "c:/Users/mario_ecxszwi/OneDrive/CodeSource/OT-Simulator/.pio/libdeps/d1_mini/OpenTherm Library/src",
->>>>>>> dfbcabcd944694e6e78d335ac2df003e60103819
                 "c:/Users/mario_ecxszwi/OneDrive/CodeSource/OT-Simulator/.pio/libdeps/d1_mini/DallasTemperature",
                 "c:/Users/mario_ecxszwi/OneDrive/CodeSource/OT-Simulator/.pio/libdeps/d1_mini/OneWire",
                 "c:/Users/mario_ecxszwi/OneDrive/CodeSource/OT-Simulator/.pio/libdeps/d1_mini/PubSubClient/src",
@@ -72,19 +65,12 @@
                 "path": [
                     "c:/Users/mario_ecxszwi/OneDrive/CodeSource/OT-Simulator/include",
                     "c:/Users/mario_ecxszwi/OneDrive/CodeSource/OT-Simulator/src",
-<<<<<<< HEAD
                     "c:/Users/mario_ecxszwi/OneDrive/CodeSource/OT-Simulator/.pio/libdeps/d1_mini/OpenTherm Library/src",
-=======
->>>>>>> dfbcabcd944694e6e78d335ac2df003e60103819
                     "c:/Users/mario_ecxszwi/OneDrive/CodeSource/OT-Simulator/.pio/libdeps/d1_mini/ESP Async WebServer/src",
                     "c:/Users/mario_ecxszwi/OneDrive/CodeSource/OT-Simulator/.pio/libdeps/d1_mini/AsyncElegantOTA/src",
                     "C:/Users/mario_ecxszwi/.platformio/packages/framework-arduinoespressif8266/libraries/Hash/src",
                     "c:/Users/mario_ecxszwi/OneDrive/CodeSource/OT-Simulator/.pio/libdeps/d1_mini/ESPAsyncTCP/src",
                     "C:/Users/mario_ecxszwi/.platformio/packages/framework-arduinoespressif8266/libraries/ESP8266WiFi/src",
-<<<<<<< HEAD
-=======
-                    "c:/Users/mario_ecxszwi/OneDrive/CodeSource/OT-Simulator/.pio/libdeps/d1_mini/OpenTherm Library/src",
->>>>>>> dfbcabcd944694e6e78d335ac2df003e60103819
                     "c:/Users/mario_ecxszwi/OneDrive/CodeSource/OT-Simulator/.pio/libdeps/d1_mini/DallasTemperature",
                     "c:/Users/mario_ecxszwi/OneDrive/CodeSource/OT-Simulator/.pio/libdeps/d1_mini/OneWire",
                     "c:/Users/mario_ecxszwi/OneDrive/CodeSource/OT-Simulator/.pio/libdeps/d1_mini/PubSubClient/src",
