@@ -72,15 +72,13 @@ double water_flow_dhw = 0;                  // Default =  0, updated with MQTT t
 double dhw_temperature = 0;                 // Default =  0, updated with MQTT topic [sensors/dhw_temperature]
 
 //DEBUG MESSAGE SETTING
-const char* serial_monitor = "1";           // Default = 0, if set to 1 the OpenTherm traffic will be shown on the serial monitor
-const char* serial_mqtt    = "1";           // Default = 0, if set to 1 all MQTT related debug messages are shown on the serial terminal
-const char* serial_range   = "1";           // Default = 0, if set to 1 all range check debug messages are shown on the serial terminal
-const char* serial_update  = "1";           // Default = 0, is set to 1 all value updates are shown on the serial terminal
-const char* serial_convert = "1";           // Default = 0, if set to 1 all value to hex conversion debug messages are shown on the serial terminal
-const char* serial_onewire = "0";           // Default = 0, if set to 1 the system will print a list of device addresses to the terminal
-const char* serial_debug   = "1";           // Default = 0, if set to 1 debug messages are shown on the serial monitor
-
-
+const char* serial_monitor    = "0";        // Default = 0, if set to 1 the OpenTherm traffic will be shown on the serial monitor
+const char* serial_mqtt       = "0";        // Default = 0, if set to 1 all MQTT related debug messages are shown on the serial terminal
+const char* serial_range      = "0";        // Default = 0, if set to 1 all range check debug messages are shown on the serial terminal
+const char* serial_update     = "0";        // Default = 0, is set to 1 all value updates are shown on the serial terminal
+const char* serial_convert    = "0";        // Default = 0, if set to 1 all value to hex conversion debug messages are shown on the serial terminal
+const char* serial_onewire    = "0";        // Default = 0, if set to 1 the system will print a list of device addresses to the terminal
+const char* serial_debug      = "0";        // Default = 0, if set to 1 debug messages are shown on the serial monitor
 
 
 //Internal program variables, DO NOT CHANGE
@@ -106,8 +104,9 @@ uint8_t sensor2[8] = {0x28, 0x18, 0xCD, 0x79, 0xA2, 0x00, 0x03, 0x4A};
 
 DeviceAddress Thermometer;
 
-int deviceCount         = 0;
-unsigned long last_temp = millis();
+int deviceCount              = 0;
+unsigned long last_temp      = millis();
+unsigned long last_ch_update = millis();
 
 //Setup message buffer size
 #define MSG_BUFFER_SIZE (110)
@@ -965,11 +964,11 @@ void processRequest(unsigned long request, OpenThermResponseStatus status) {
           msg_value = heater_flow_temperature;
         }
       } else {
-          old_value = msg_value.toDouble();
-          msg_value = String(heater_temp);
+        old_value = msg_value.toDouble();
+        msg_value = String(heater_temp);
       }
       //Publish the boiler temperature to MQTT [thermostat/boilertemp]
-      msg_full = heater_temp;
+      msg_full = String(heater_temp);
       snprintf (msg, MSG_BUFFER_SIZE, msg_full.c_str());
       client.publish("thermostat/boilertemp", msg);
     }
@@ -1023,7 +1022,7 @@ void processRequest(unsigned long request, OpenThermResponseStatus status) {
           msg_value = String(return_temp);
       }
       //Publish the boiler returntemperature to MQTT [thermostat/returntemp]
-        msg_full = return_temp;
+        msg_full = String(return_temp);
         snprintf (msg, MSG_BUFFER_SIZE, msg_full.c_str());
         client.publish("thermostat/returntemp", msg);
     }
@@ -1201,7 +1200,22 @@ void processRequest(unsigned long request, OpenThermResponseStatus status) {
       snprintf (msg, MSG_BUFFER_SIZE, msg_full.c_str());
       client.publish("thermostat/ch_requested", msg);
     }
-  } 
+  } else {
+    //Send MQTT Message every 60 sec if no change
+    unsigned long now = millis();
+    if (now - last_ch_update > 60000) {
+      if (ch_enabled == 1 ) {
+        msg_full = "1";
+        snprintf (msg, MSG_BUFFER_SIZE, msg_full.c_str());
+        client.publish("thermostat/ch_requested", msg);
+      } else {
+        msg_full = "0";
+        snprintf (msg, MSG_BUFFER_SIZE, msg_full.c_str());
+        client.publish("thermostat/ch_requested", msg);
+      }
+      last_ch_update = millis();
+    }
+  }
 
   //Publish the modulation level to MQTT [thermostat/modulation]
   if ( msg_id == "11" ) {
