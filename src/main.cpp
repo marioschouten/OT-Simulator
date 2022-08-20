@@ -3,11 +3,12 @@
 //Arduino Wemo D1 mini based E-C(entral)H(eating) follower using OpenTherm protocol and Ihor Melnyk's slave Terminal adapter for communication.
 //
 //Implemented functionality is as follows:
-// - The heater operational status is set via MQTT topic [status] with the format as described under HEATER SETTINGS
-// - The various measurements of temperature, pressure, flow etc. are set via MTT topic [sensors] as described under HEATER SETTINGS
-// - The commands to update setpoints are set via MQTT topic [command] in the format as described under HEATER SETTINGS
-// - The modulation level requested by the Thermostat is publish via MQTT topic [thermostat/modulation]
-// - The CH requested by the Thermostat is publish via MQTT topic [thermostat/ch_requested]
+// - The E-CV operational status is set via MQTT topic [ecv/status] with the format as described under HEATER SETTINGS
+// - The various measurements of temperature, pressure, flow etc. are set via MTT topic [ecv/sensors] as described under HEATER SETTINGS
+// - The commands to update setpoints are set via MQTT topic [ecv/command] in the format as described under HEATER SETTINGS
+// - The modulation level requested by the Thermostat is publish via MQTT topic [ecv/thermostat/modulation]
+// - The CH requested by the Thermostat is publish via MQTT topic [ecv/thermostat/ch_requested]
+// - The Thermostat raw data is publish via MQTT topic [ecv/thermostat/rawdata]
 
 
 //Libraries
@@ -47,33 +48,33 @@ OpenTherm ot(inPin, outPin, true);
 //Openterm Leader Follower response timing (Min. 20ms - max. 800ms)
 unsigned int timing       = 125; // Default timing is 25ms
 
-//HEATER STATUS SETTINGS - Default can be adjusted with MQTT message
-const char* fault_indication = "0";         // Default = 0, updated with MQTT topic [status/fault]
-const char* CH_mode = "0";                  // Default = 0, updated with MQTT topic [status/ch_mode]
-const char* flame_status = "0";             // Default = 0, updated with MQTT topic [status/flame]
+//ECV STATUS SETTINGS - Default can be adjusted with MQTT message
+const char* fault_indication = "0";         // Default = 0, updated with MQTT topic [ecv/status/fault]
+const char* CH_mode = "0";                  // Default = 0, updated with MQTT topic [ecv/status/ch_mode]
+const char* flame_status = "0";             // Default = 0, updated with MQTT topic [ecv/status/flame]
 const char* DHW_mode = "0";                 // Default = 0, if DHW is present change to 1
 const char* cooling_status = "0";           // Default = 0, no support in this software version for cooling status
 const char* CH2_mode = "0";                 // Default = 0, no support in this software version for CH2 mode
 const char* diagnostic = "0";               // Default = 0, no support in this software version for diagnostics
 const char* msg_0_bit_7 = "0";              // Reserved
 
-//HEATER COMMAND SETTINGS - Default can be adjusted with MQTT message
-double max_rel_modulation = 100;            // Default = 100, updated with MQTT topic [command/max_rel_modulation]
-double control_ch_setpoint = 75;            // Default =  75, updated with MQTT topic [command/control_ch_setpoint]
-double max_ch_water_setpoint = 85;          // Default =  85, updated with MQTT topic [command/max_ch_water_setpoint]
-double dhw_setpoint = 0;                    // Default =   0, updated with MQTT topic [command/dhw_setpoint]
+//ECV COMMAND SETTINGS - Default can be adjusted with MQTT message
+double max_rel_modulation = 100;            // Default = 100, updated with MQTT topic [ecv/command/max_rel_modulation]
+double control_ch_setpoint = 75;            // Default =  75, updated with MQTT topic [ecv/command/control_ch_setpoint]
+double max_ch_water_setpoint = 85;          // Default =  85, updated with MQTT topic [ecv/command/max_ch_water_setpoint]
+double dhw_setpoint = 65;                   // Default =  65, updated with MQTT topic [ecv/command/dhw_setpoint]
 
-//HEATER SENSORS SETTINGS - Default can be adjusted with MQTT message
-double water_pressure_ch = 0;               // Default =  0, updated with MQTT topic [sensors/water_pressure_ch]
-double outside_temperature = 0;             // Default =  0, updated with MQTT topic [sensors/outside_temperature]
-double heater_flow_temperature = 0;         // Default =  0, updated with MQTT topic [sensors/heater_flow_temperature]
-double return_water_temperature = 0;        // Default =  0, updated with MQTT topic [sensors/return_water_temperature]
-double water_flow_dhw = 0;                  // Default =  0, updated with MQTT topic [sensors/water_flow_dhw]
-double dhw_temperature = 0;                 // Default =  0, updated with MQTT topic [sensors/dhw_temperature]
+//ECV SENSORS SETTINGS - Default can be adjusted with MQTT message
+double water_pressure_ch = 0;               // Default =  0, updated with MQTT topic [ecv/sensors/water_pressure_ch]
+double outside_temperature = 0;             // Default =  0, updated with MQTT topic [ecv/sensors/outside_temperature]
+double heater_flow_temperature = 0;         // Default =  0, updated with MQTT topic [ecv/sensors/heater_flow_temperature]
+double return_water_temperature = 0;        // Default =  0, updated with MQTT topic [ecv/sensors/return_water_temperature]
+double water_flow_dhw = 0;                  // Default =  0, updated with MQTT topic [ecv/sensors/water_flow_dhw]
+double dhw_temperature = 0;                 // Default =  0, updated with MQTT topic [ecv/sensors/dhw_temperature]
 
 //DEBUG MESSAGE SETTING
 const char* serial_monitor    = "0";        // Default = 0, if set to 1 the OpenTherm traffic will be shown on the serial monitor
-const char* serial_mqtt       = "0";        // Default = 0, if set to 1 all MQTT related debug messages are shown on the serial terminal
+const char* serial_mqtt       = "0";        // Default = 0, if set to 1 all outgoing MQTT related debug messages are shown on the serial terminal
 const char* serial_range      = "0";        // Default = 0, if set to 1 all range check debug messages are shown on the serial terminal
 const char* serial_update     = "0";        // Default = 0, is set to 1 all value updates are shown on the serial terminal
 const char* serial_convert    = "0";        // Default = 0, if set to 1 all value to hex conversion debug messages are shown on the serial terminal
@@ -397,11 +398,11 @@ void callback(char* topic, byte* payload, unsigned int length) {
     Serial.print(topic);
   }
 
-  //MQTT TOPIC is [Sensors/fault], set the corresponding variables
-  if (strcmp(topic, "status/fault") == 0) {
+  //MQTT TOPIC is [ecv/sensors/fault], set the corresponding variables
+  if (strcmp(topic, "ecv/status/fault") == 0) {
     if ((char)payload[0] == 48 ) {follower_status[7] = 0; }
     if ((char)payload[0] == 49 ) {follower_status[7] = 1; }
-    //DEBUG_MQTT: Print payload of MQTT message with topic [sensors/fault]
+    //DEBUG_MQTT: Print payload of MQTT message with topic [ecv/sensors/fault]
     if (strcmp(serial_mqtt, "1") == 0 ) {
       Serial.print("   Fault status: ");
       Serial.print(payload[0]);
@@ -411,11 +412,11 @@ void callback(char* topic, byte* payload, unsigned int length) {
     }
   }
 
-  //MQTT TOPIC is [Sensors/ch_mode], set the corresponding variables
-  if (strcmp(topic, "status/ch_mode") == 0) {
+  //MQTT TOPIC is [ecv/sensors/ch_mode], set the corresponding variables
+  if (strcmp(topic, "ecv/status/ch_mode") == 0) {
     if ((char)payload[0] == 48 ) {follower_status[6] = 0; }
     if ((char)payload[0] == 49 ) {follower_status[6] = 1; }
-    //DEBUG_MQTT: Print payload of MQTT message with topic [sensors/ch_mode]
+    //DEBUG_MQTT: Print payload of MQTT message with topic [ecv/sensors/ch_mode]
     if (strcmp(serial_mqtt, "1") == 0 ) {
       Serial.print("   CH-Mode status: ");
       Serial.print(payload[0]);
@@ -425,11 +426,11 @@ void callback(char* topic, byte* payload, unsigned int length) {
     }
   }
 
-  //MQTT TOPIC is [Sensors/flame], set the corresponding variables
-  if (strcmp(topic, "status/flame") == 0) {
+  //MQTT TOPIC is [ecv/sensors/flame], set the corresponding variables
+  if (strcmp(topic, "ecv/status/flame") == 0) {
     if ((char)payload[0] == 48 ) {follower_status[4] = 0; }
     if ((char)payload[0] == 49 ) {follower_status[4] = 1; }
-    //DEBUG_MQTT: Print payload of MQTT message with topic [sensors/flame]
+    //DEBUG_MQTT: Print payload of MQTT message with topic [ecv/sensors/flame]
     if (strcmp(serial_mqtt, "1") == 0 ) {
       Serial.print("   Flame status: ");
       Serial.print(payload[0]);
@@ -439,11 +440,11 @@ void callback(char* topic, byte* payload, unsigned int length) {
     }
   }
 
-  //MQTT TOPIC is [command/max_rel_modulation], set the corresponding variables
-  if (strcmp(topic, "command/max_rel_modulation") == 0) {
+  //MQTT TOPIC is [ecv/command/max_rel_modulation], set the corresponding variables
+  if (strcmp(topic, "ecv/command/max_rel_modulation") == 0) {
     String test = String((char*)payload);
     max_rel_modulation = test.toDouble();
-    //DEBUG_MQTT: Print payload of MQTT message with topic [sensors/flame]
+    //DEBUG_MQTT: Print payload of MQTT message with topic [ecv/sensors/flame]
     if (strcmp(serial_mqtt, "1") == 0 ) {
       Serial.print("   Set max relative modulation: ");
       Serial.print(max_rel_modulation);
@@ -451,11 +452,11 @@ void callback(char* topic, byte* payload, unsigned int length) {
     }
   }
 
-  //MQTT TOPIC is [command/control_ch_setpoint], set the corresponding variables
-  if (strcmp(topic, "command/control_ch_setpoint") == 0) {
+  //MQTT TOPIC is [ecv/command/control_ch_setpoint], set the corresponding variables
+  if (strcmp(topic, "ecv/command/control_ch_setpoint") == 0) {
     String test = String((char*)payload);
     control_ch_setpoint = test.toDouble();
-    //DEBUG_MQTT: Print payload of MQTT message with topic [sensors/flame]
+    //DEBUG_MQTT: Print payload of MQTT message with topic [ecv/sensors/flame]
     if (strcmp(serial_mqtt, "1") == 0 ) {
       Serial.print("   Set control CH setpoint: ");
       Serial.print(control_ch_setpoint);
@@ -463,11 +464,11 @@ void callback(char* topic, byte* payload, unsigned int length) {
     }
   }
 
-  //MQTT TOPIC is [command/max_ch_water_setpoint], set the corresponding variables
-  if (strcmp(topic, "command/max_ch_water_setpoint") == 0) {
+  //MQTT TOPIC is [ecv/command/max_ch_water_setpoint], set the corresponding variables
+  if (strcmp(topic, "ecv/command/max_ch_water_setpoint") == 0) {
     String test = String((char*)payload);
     max_ch_water_setpoint = test.toDouble();
-    //DEBUG_MQTT: Print payload of MQTT message with topic [sensors/flame]
+    //DEBUG_MQTT: Print payload of MQTT message with topic [ecv/sensors/flame]
     if (strcmp(serial_mqtt, "1") == 0 ) {
       Serial.print("   Set max CH water setpoint: ");
       Serial.print(max_ch_water_setpoint);
@@ -475,10 +476,10 @@ void callback(char* topic, byte* payload, unsigned int length) {
     }
   }
 
-  //MQTT TOPIC is [command/dhw_setpoint], set the corresponding variables
-  if (strcmp(topic, "command/dhw_setpoint") == 0) {
+  //MQTT TOPIC is [ecv/command/dhw_setpoint], set the corresponding variables
+  if (strcmp(topic, "ecv/command/dhw_setpoint") == 0) {
     dhw_setpoint = atoi((char *)payload);
-    //DEBUG_MQTT: Print payload of MQTT message with topic [sensors/flame]
+    //DEBUG_MQTT: Print payload of MQTT message with topic [ecv/sensors/flame]
     if (strcmp(serial_mqtt, "1") == 0 ) {
       Serial.print("   Set DHW setpoint: ");
       Serial.print(dhw_setpoint);
@@ -486,11 +487,11 @@ void callback(char* topic, byte* payload, unsigned int length) {
     }
   }
 
-  //MQTT TOPIC is [sensors/water_pressure_ch], set the corresponding variables
-  if (strcmp(topic, "sensors/water_pressure_ch") == 0) {
+  //MQTT TOPIC is [ecv/sensors/water_pressure_ch], set the corresponding variables
+  if (strcmp(topic, "ecv/sensors/water_pressure_ch") == 0) {
     String test = String((char*)payload);
     water_pressure_ch = test.toDouble();
-    //DEBUG_MQTT: Print payload of MQTT message with topic [sensors/flame]
+    //DEBUG_MQTT: Print payload of MQTT message with topic [ecv/sensors/flame]
     if (strcmp(serial_mqtt, "1") == 0 ) {
       Serial.print("   Water pressure CH: ");
       Serial.print(water_pressure_ch);
@@ -498,11 +499,11 @@ void callback(char* topic, byte* payload, unsigned int length) {
     }
   }
 
-  //MQTT TOPIC is [sensors/outside_temperature], set the corresponding variables
-  if (strcmp(topic, "sensors/outside_temperature") == 0) {
+  //MQTT TOPIC is [ecv/sensors/outside_temperature], set the corresponding variables
+  if (strcmp(topic, "ecv/sensors/outside_temperature") == 0) {
     String test = String((char*)payload);
     outside_temperature = test.toDouble();
-    //DEBUG_MQTT: Print payload of MQTT message with topic [sensors/flame]
+    //DEBUG_MQTT: Print payload of MQTT message with topic [ecv/sensors/flame]
     if (strcmp(serial_mqtt, "1") == 0 ) {
       Serial.print("   Outside temperature: ");
       Serial.print(outside_temperature);
@@ -510,11 +511,11 @@ void callback(char* topic, byte* payload, unsigned int length) {
     }
   }
 
-  //MQTT TOPIC is [sensors/heater_flow_temperature], set the corresponding variables
-  if (strcmp(topic, "sensors/heater_flow_temperature") == 0) {
+  //MQTT TOPIC is [ecv/sensors/heater_flow_temperature], set the corresponding variables
+  if (strcmp(topic, "ecv/sensors/heater_flow_temperature") == 0) {
     String test = String((char*)payload);
     heater_flow_temperature = test.toDouble();
-    //DEBUG_MQTT: Print payload of MQTT message with topic [sensors/flame]
+    //DEBUG_MQTT: Print payload of MQTT message with topic [ecv/sensors/flame]
     if (strcmp(serial_mqtt, "1") == 0 ) {
       Serial.print("   Boiler flow temperature: ");
       Serial.print(heater_flow_temperature);
@@ -522,11 +523,11 @@ void callback(char* topic, byte* payload, unsigned int length) {
     }
   }
 
-  //MQTT TOPIC is [sensors/return_water_temperature], set the corresponding variables
-  if (strcmp(topic, "sensors/return_water_temperature") == 0) {
+  //MQTT TOPIC is [ecv/sensors/return_water_temperature], set the corresponding variables
+  if (strcmp(topic, "ecv/sensors/return_water_temperature") == 0) {
     String test = String((char*)payload);
     return_water_temperature = test.toDouble();
-    //DEBUG_MQTT: Print payload of MQTT message with topic [sensors/flame]
+    //DEBUG_MQTT: Print payload of MQTT message with topic [ecv/sensors/flame]
     if (strcmp(serial_mqtt, "1") == 0 ) {
       Serial.print("   Return water temperature: ");
       Serial.print(return_water_temperature);
@@ -534,11 +535,11 @@ void callback(char* topic, byte* payload, unsigned int length) {
     }
   }
 
-  //MQTT TOPIC is [sensors/water_flow_dhw], set the corresponding variables
-  if (strcmp(topic, "sensors/water_flow_dhw") == 0) {
+  //MQTT TOPIC is [ecv/sensors/water_flow_dhw], set the corresponding variables
+  if (strcmp(topic, "ecv/sensors/water_flow_dhw") == 0) {
     String test = String((char*)payload);
     water_flow_dhw = test.toDouble();
-    //DEBUG_MQTT: Print payload of MQTT message with topic [sensors/flame]
+    //DEBUG_MQTT: Print payload of MQTT message with topic [ecv/sensors/flame]
     if (strcmp(serial_mqtt, "1") == 0 ) {
       Serial.print("   Water flow DHW: ");
       Serial.print(water_flow_dhw);
@@ -546,11 +547,11 @@ void callback(char* topic, byte* payload, unsigned int length) {
     }
   }
 
-  //MQTT TOPIC is [sensors/dhw_temperature], set the corresponding variables
-  if (strcmp(topic, "sensors/dhw_temperature") == 0) {
+  //MQTT TOPIC is [ecv/sensors/dhw_temperature], set the corresponding variables
+  if (strcmp(topic, "ecv/sensors/dhw_temperature") == 0) {
     String test = String((char*)payload);
     dhw_temperature = test.toDouble();
-    //DEBUG_MQTT: Print payload of MQTT message with topic [sensors/flame]
+    //DEBUG_MQTT: Print payload of MQTT message with topic [ecv/sensors/flame]
     if (strcmp(serial_mqtt, "1") == 0 ) {
       Serial.print("   DHW Temperature: ");
       Serial.print(dhw_temperature);
@@ -558,8 +559,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
     }
   }
 
-  //MQTT TOPIC is "heater", use the payload of 8 characters to test the alaysis_respond software
-  if (strcmp(topic, "heater") == 0) {
+  //MQTT TOPIC is "ecv/rawdata/command", use the payload of 8 characters to test the alaysis_respond software
+  if (strcmp(topic, "ecv/rawdata/command") == 0) {
     //Transform MQTT payload to ASCII characters in pos[8]
     String msg_pos[8];
 
@@ -604,7 +605,7 @@ void reconnect() {
     }
 
     // Attempt to connect
-    if (client.connect("E-Heater", mqtt_user, mqtt_password)) {
+    if (client.connect("ECV", mqtt_user, mqtt_password)) {
       //Switch ON the LED
       digitalWrite(LED_BUILTIN, LOW);   // turn the LED on (HIGH is the voltage level)
 
@@ -614,22 +615,22 @@ void reconnect() {
       }
 
       //Once connected publish birth message on initial connection
-      snprintf (msg, MSG_BUFFER_SIZE, "E-Heater is ONLINE");
-      client.publish("heater-service",msg);
-      client.subscribe("heater");
-      client.subscribe("status/fault");
-      client.subscribe("status/ch_mode");
-      client.subscribe("status/flame");
-      client.subscribe("command/max_rel_modulation");
-      client.subscribe("command/control_ch_setpoint");
-      client.subscribe("command/max_ch_water_setpoint");
-      client.subscribe("command/dhw_setpoint");
-      client.subscribe("sensors/water_pressure_ch");
-      client.subscribe("sensors/outside_temperature");
-      client.subscribe("sensors/heater_flow_temperature");
-      client.subscribe("sensors/return_water_temperature");
-      client.subscribe("sensors/water_flow_dhw");
-      client.subscribe("sensors/dhw_temperature");
+      snprintf (msg, MSG_BUFFER_SIZE, "E-CV is ONLINE");
+      client.publish("ecv/system",msg);
+      client.subscribe("ecv/rawdata/command");
+      client.subscribe("ecv/status/fault");
+      client.subscribe("ecv/status/ch_mode");
+      client.subscribe("ecv/status/flame");
+      client.subscribe("ecv/command/max_rel_modulation");
+      client.subscribe("ecv/command/control_ch_setpoint");
+      client.subscribe("ecv/command/max_ch_water_setpoint");
+      client.subscribe("ecv/command/dhw_setpoint");
+      client.subscribe("ecv/sensors/water_pressure_ch");
+      client.subscribe("ecv/sensors/outside_temperature");
+      client.subscribe("ecv/sensors/heater_flow_temperature");
+      client.subscribe("ecv/sensors/return_water_temperature");
+      client.subscribe("ecv/sensors/water_flow_dhw");
+      client.subscribe("ecv/sensors/dhw_temperature");
       
       //TEST: Print the result
       if (strcmp(serial_mqtt, "1") == 0 ) {
@@ -776,7 +777,7 @@ void processRequest(unsigned long request, OpenThermResponseStatus status) {
     Serial.println();
   }
 
-  //DECODE message flag flag8/flag8, publish result on topic "thermostat" and send
+  //DECODE message flag flag8/flag8, publish result on topic "ecv/thermostat" and send
   if (strcmp(msg_flag, "flag8") == 0) {
     msg_value_leader = msg_pos[4] + msg_pos[5];
     msg_value_leader = decode_flag_flag8(msg_value_leader);
@@ -819,12 +820,12 @@ void processRequest(unsigned long request, OpenThermResponseStatus status) {
     //Set ch_enabled flag for MQTT modulation reporting
     ch_enabled = leader_status[7];
 
-    //Publish the received message to MQTT "thermostat"
+    //Publish the received message to MQTT "ecv/thermostat/rawdata/rx"
     snprintf (msg, MSG_BUFFER_SIZE, msg_full.c_str());
-    client.publish("thermostat", msg);
+    client.publish("ecv/thermostat/rawdata/rx", msg);
   }
 
- //DECODE message flag flag8/u8, publish result on topic "thermostat" and send
+ //DECODE message flag flag8/u8, publish result on topic "ecv/thermostat/rawdata/rx" and send
   if (strcmp(msg_flag, "u8") == 0) {
     //Change the message type to DATA-INVALID and correct the parity
     f2l_message = "DATA-INVALID  "; f2l_hex = "6"; f2l_parity = f2l_parity + 1;
@@ -844,12 +845,12 @@ void processRequest(unsigned long request, OpenThermResponseStatus status) {
       Serial.println();
     }
 
-    //Publish the received message to MQTT "thermostat"
+    //Publish the received message to MQTT "ecv/thermostat/rawdata/rx"
     snprintf (msg, MSG_BUFFER_SIZE, msg_full.c_str());
-    client.publish("thermostat", msg);
+    client.publish("ecv/thermostat/rawdata/rx", msg);
   }
 
-  //DECODE message flag f8.8, publish result on topic "thermostat" and send 
+  //DECODE message flag f8.8, publish result on topic "ecv/thermostat/rawdata/rx" and send 
   if (strcmp(msg_flag, "f8.8") == 0) {
     msg_value = msg_pos[4] + msg_pos[5] + msg_pos[6] + msg_pos[7];
     msg_value = decode_flag_f8(msg_value);
@@ -863,9 +864,9 @@ void processRequest(unsigned long request, OpenThermResponseStatus status) {
       Serial.println();
     }
 
-    //Publish the received message to MQTT "thermostat"
+    //Publish the received message to MQTT "ecv/thermostat/rawdata/rx"
     snprintf (msg, MSG_BUFFER_SIZE, msg_full.c_str());
-    client.publish("thermostat", msg);
+    client.publish("ecv/thermostat/rawdata/rx", msg);
   }
 
   //ENCODE message flag flag8/flag8
@@ -916,7 +917,7 @@ void processRequest(unsigned long request, OpenThermResponseStatus status) {
     msg_pos[4] = "0"; f2l_parity = f2l_parity + 0;
   }
 
-  //CHECK if there are updated default or MQTT received values to report back to the Thermostat
+  //CHECK if there are updated default or MQTT received values to report back to the ecv/thermostat/*
   if (msg_id == "01" || msg_id == "12" || msg_id == "13" || msg_id == "19" || msg_id == "0e" || msg_id == "1a" || msg_id == "1b"|| msg_id == "1c" || msg_id == "38" || msg_id == "39") {
 
     //Check the ID 01 Control CH setpoint
@@ -967,10 +968,10 @@ void processRequest(unsigned long request, OpenThermResponseStatus status) {
         old_value = msg_value.toDouble();
         msg_value = String(heater_temp);
       }
-      //Publish the boiler temperature to MQTT [thermostat/boilertemp]
+      //Publish the boiler temperature to MQTT [ecv/thermostat/boilertemp]
       msg_full = String(heater_temp);
       snprintf (msg, MSG_BUFFER_SIZE, msg_full.c_str());
-      client.publish("thermostat/boilertemp", msg);
+      client.publish("ecv/thermostat/boilertemp", msg);
     }
 
        //Check the ID 14 Max relative modulation
@@ -1021,10 +1022,10 @@ void processRequest(unsigned long request, OpenThermResponseStatus status) {
           old_value = msg_value.toDouble();
           msg_value = String(return_temp);
       }
-      //Publish the boiler returntemperature to MQTT [thermostat/returntemp]
+      //Publish the boiler returntemperature to MQTT [ecv/thermostat/returntemp]
         msg_full = String(return_temp);
         snprintf (msg, MSG_BUFFER_SIZE, msg_full.c_str());
-        client.publish("thermostat/returntemp", msg);
+        client.publish("ecv/thermostat/returntemp", msg);
     }
  
  //Check the ID 56 DHW setpoint
@@ -1034,7 +1035,7 @@ void processRequest(unsigned long request, OpenThermResponseStatus status) {
         old_value = msg_value.toDouble();
       } else {
         old_value = msg_value.toDouble();
-        msg_value = dhw_setpoint;
+        msg_value = String(dhw_setpoint);
       }
     }
 
@@ -1183,22 +1184,22 @@ void processRequest(unsigned long request, OpenThermResponseStatus status) {
     now = millis();
   }
 
-  //Publish the received message to MQTT [thermostat]
+  //Publish the received message to MQTT [ecv/thermostat/rawdata/tx]
   msg_full = msg_full + " Replied after: " + (now - msg_rx_ts) + "ms.";
   snprintf (msg, MSG_BUFFER_SIZE, msg_full.c_str());
-  client.publish("thermostat", msg);
+  client.publish("ecv/thermostat/rawdata/tx", msg);
 
-  //Publish CH requested to MQTT [thermostat/ch_requested]
+  //Publish CH requested to MQTT [ecv/thermostat/ch_requested]
   if ( ch_enabled != ch_enabled_history ) {
     ch_enabled_history = ch_enabled;
     if (ch_enabled == 1 ) {
       msg_full = "1";
       snprintf (msg, MSG_BUFFER_SIZE, msg_full.c_str());
-      client.publish("thermostat/ch_requested", msg);
+      client.publish("ecv/thermostat/ch_requested", msg);
     } else {
       msg_full = "0";
       snprintf (msg, MSG_BUFFER_SIZE, msg_full.c_str());
-      client.publish("thermostat/ch_requested", msg);
+      client.publish("ecv/thermostat/ch_requested", msg);
     }
   } else {
     //Send MQTT Message every 60 sec if no change
@@ -1207,21 +1208,21 @@ void processRequest(unsigned long request, OpenThermResponseStatus status) {
       if (ch_enabled == 1 ) {
         msg_full = "1";
         snprintf (msg, MSG_BUFFER_SIZE, msg_full.c_str());
-        client.publish("thermostat/ch_requested", msg);
+        client.publish("ecv/thermostat/ch_requested", msg);
       } else {
         msg_full = "0";
         snprintf (msg, MSG_BUFFER_SIZE, msg_full.c_str());
-        client.publish("thermostat/ch_requested", msg);
+        client.publish("ecv/thermostat/ch_requested", msg);
       }
       last_ch_update = millis();
     }
   }
 
-  //Publish the modulation level to MQTT [thermostat/modulation]
+  //Publish the modulation level to MQTT [ecv/thermostat/modulation]
   if ( msg_id == "11" ) {
     msg_full = msg_value;
     snprintf (msg, MSG_BUFFER_SIZE, msg_full.c_str());
-    client.publish("thermostat/modulation", msg);
+    client.publish("ecv/thermostat/modulation", msg);
   }
 
 
@@ -1326,7 +1327,6 @@ void loop() {
   if (!client.connected()) {
     //Switch OFF the LED
     digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
-
     //Reconnect
     reconnect();
   } 
@@ -1334,6 +1334,8 @@ void loop() {
   //OpenTerm process
   ot.process();
 
+  //client.loop();
+   
   //Read temperature every 5 seconds
   unsigned long now = millis();
   if (now - last_temp > 5000) {
