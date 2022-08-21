@@ -75,6 +75,7 @@ double dhw_temperature = 0;                 // Default =  0, updated with MQTT t
 //DEBUG MESSAGE SETTING
 const char* serial_monitor    = "0";        // Default = 0, if set to 1 the OpenTherm traffic will be shown on the serial monitor
 const char* serial_mqtt       = "0";        // Default = 0, if set to 1 all outgoing MQTT related debug messages are shown on the serial terminal
+const char* serial_mqtt_in    = "1";        // Default = 0, if set to 1 all incomming MQTT related debug messages are shown on the serial terminal
 const char* serial_range      = "0";        // Default = 0, if set to 1 all range check debug messages are shown on the serial terminal
 const char* serial_update     = "0";        // Default = 0, is set to 1 all value updates are shown on the serial terminal
 const char* serial_convert    = "0";        // Default = 0, if set to 1 all value to hex conversion debug messages are shown on the serial terminal
@@ -393,7 +394,7 @@ void setup_wifi() {
 //FUNCTION: Call-back on MQTT message, called from setup() to update variables with MQTT topic "sensors"  messages
 void callback(char* topic, byte* payload, unsigned int length) {
   //DEBUG_MQTT: Print the topic of the received MQTT message
-  if (strcmp(serial_mqtt, "1") == 0 ) {
+  if (strcmp(serial_mqtt_in, "1") == 0 ) {
     Serial.print("MQTT Message topic: ");
     Serial.print(topic);
   }
@@ -403,7 +404,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     if ((char)payload[0] == 48 ) {follower_status[7] = 0; }
     if ((char)payload[0] == 49 ) {follower_status[7] = 1; }
     //DEBUG_MQTT: Print payload of MQTT message with topic [ecv/sensors/fault]
-    if (strcmp(serial_mqtt, "1") == 0 ) {
+    if (strcmp(serial_mqtt_in, "1") == 0 ) {
       Serial.print("   Fault status: ");
       Serial.print(payload[0]);
       Serial.print("   Follower status: ");
@@ -417,7 +418,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     if ((char)payload[0] == 48 ) {follower_status[6] = 0; }
     if ((char)payload[0] == 49 ) {follower_status[6] = 1; }
     //DEBUG_MQTT: Print payload of MQTT message with topic [ecv/sensors/ch_mode]
-    if (strcmp(serial_mqtt, "1") == 0 ) {
+    if (strcmp(serial_mqtt_in, "1") == 0 ) {
       Serial.print("   CH-Mode status: ");
       Serial.print(payload[0]);
       Serial.print("   Follower status: ");
@@ -431,7 +432,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     if ((char)payload[0] == 48 ) {follower_status[4] = 0; }
     if ((char)payload[0] == 49 ) {follower_status[4] = 1; }
     //DEBUG_MQTT: Print payload of MQTT message with topic [ecv/sensors/flame]
-    if (strcmp(serial_mqtt, "1") == 0 ) {
+    if (strcmp(serial_mqtt_in, "1") == 0 ) {
       Serial.print("   Flame status: ");
       Serial.print(payload[0]);
       Serial.print("   Follower status: ");
@@ -445,7 +446,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     String test = String((char*)payload);
     max_rel_modulation = test.toDouble();
     //DEBUG_MQTT: Print payload of MQTT message with topic [ecv/sensors/flame]
-    if (strcmp(serial_mqtt, "1") == 0 ) {
+    if (strcmp(serial_mqtt_in, "1") == 0 ) {
       Serial.print("   Set max relative modulation: ");
       Serial.print(max_rel_modulation);
       Serial.println();
@@ -457,7 +458,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     String test = String((char*)payload);
     control_ch_setpoint = test.toDouble();
     //DEBUG_MQTT: Print payload of MQTT message with topic [ecv/sensors/flame]
-    if (strcmp(serial_mqtt, "1") == 0 ) {
+    if (strcmp(serial_mqtt_in, "1") == 0 ) {
       Serial.print("   Set control CH setpoint: ");
       Serial.print(control_ch_setpoint);
       Serial.println();
@@ -469,7 +470,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     String test = String((char*)payload);
     max_ch_water_setpoint = test.toDouble();
     //DEBUG_MQTT: Print payload of MQTT message with topic [ecv/sensors/flame]
-    if (strcmp(serial_mqtt, "1") == 0 ) {
+    if (strcmp(serial_mqtt_in, "1") == 0 ) {
       Serial.print("   Set max CH water setpoint: ");
       Serial.print(max_ch_water_setpoint);
       Serial.println();
@@ -480,7 +481,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
   if (strcmp(topic, "ecv/command/dhw_setpoint") == 0) {
     dhw_setpoint = atoi((char *)payload);
     //DEBUG_MQTT: Print payload of MQTT message with topic [ecv/sensors/flame]
-    if (strcmp(serial_mqtt, "1") == 0 ) {
+    if (strcmp(serial_mqtt_in, "1") == 0 ) {
       Serial.print("   Set DHW setpoint: ");
       Serial.print(dhw_setpoint);
       Serial.println();
@@ -492,7 +493,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     String test = String((char*)payload);
     water_pressure_ch = test.toDouble();
     //DEBUG_MQTT: Print payload of MQTT message with topic [ecv/sensors/flame]
-    if (strcmp(serial_mqtt, "1") == 0 ) {
+    if (strcmp(serial_mqtt_in, "1") == 0 ) {
       Serial.print("   Water pressure CH: ");
       Serial.print(water_pressure_ch);
       Serial.println();
@@ -504,7 +505,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     String test = String((char*)payload);
     outside_temperature = test.toDouble();
     //DEBUG_MQTT: Print payload of MQTT message with topic [ecv/sensors/flame]
-    if (strcmp(serial_mqtt, "1") == 0 ) {
+    if (strcmp(serial_mqtt_in, "1") == 0 ) {
       Serial.print("   Outside temperature: ");
       Serial.print(outside_temperature);
       Serial.println();
@@ -516,7 +517,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     String test = String((char*)payload);
     heater_flow_temperature = test.toDouble();
     //DEBUG_MQTT: Print payload of MQTT message with topic [ecv/sensors/flame]
-    if (strcmp(serial_mqtt, "1") == 0 ) {
+    if (strcmp(serial_mqtt_in, "1") == 0 ) {
       Serial.print("   Boiler flow temperature: ");
       Serial.print(heater_flow_temperature);
       Serial.println();
@@ -528,7 +529,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     String test = String((char*)payload);
     return_water_temperature = test.toDouble();
     //DEBUG_MQTT: Print payload of MQTT message with topic [ecv/sensors/flame]
-    if (strcmp(serial_mqtt, "1") == 0 ) {
+    if (strcmp(serial_mqtt_in, "1") == 0 ) {
       Serial.print("   Return water temperature: ");
       Serial.print(return_water_temperature);
       Serial.println();
@@ -540,7 +541,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     String test = String((char*)payload);
     water_flow_dhw = test.toDouble();
     //DEBUG_MQTT: Print payload of MQTT message with topic [ecv/sensors/flame]
-    if (strcmp(serial_mqtt, "1") == 0 ) {
+    if (strcmp(serial_mqtt_in, "1") == 0 ) {
       Serial.print("   Water flow DHW: ");
       Serial.print(water_flow_dhw);
       Serial.println();
@@ -552,14 +553,14 @@ void callback(char* topic, byte* payload, unsigned int length) {
     String test = String((char*)payload);
     dhw_temperature = test.toDouble();
     //DEBUG_MQTT: Print payload of MQTT message with topic [ecv/sensors/flame]
-    if (strcmp(serial_mqtt, "1") == 0 ) {
+    if (strcmp(serial_mqtt_in, "1") == 0 ) {
       Serial.print("   DHW Temperature: ");
       Serial.print(dhw_temperature);
       Serial.println();
     }
   }
 
-  //MQTT TOPIC is "ecv/rawdata/command", use the payload of 8 characters to test the alaysis_respond software
+  //MQTT TOPIC is "ecv/rawdata/command", use the payload of 8 characters to test the analysis_respond software
   if (strcmp(topic, "ecv/rawdata/command") == 0) {
     //Transform MQTT payload to ASCII characters in pos[8]
     String msg_pos[8];
@@ -583,7 +584,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     msg_pos[7] = static_cast<char>(position_7);
   
     //DEBUG_MQTT: On serial terminal report message arrived with content
-    if (strcmp(serial_mqtt, "1") == 0 ) {
+    if (strcmp(serial_mqtt_in, "1") == 0 ) {
       Serial.print("MQTT Message arrived with topic [");
       Serial.print(topic);
       Serial.print("] and is converted and stored into pos[] with content: ");
@@ -1334,7 +1335,7 @@ void loop() {
   //OpenTerm process
   ot.process();
 
-  //client.loop();
+  client.loop();
    
   //Read temperature every 5 seconds
   unsigned long now = millis();
