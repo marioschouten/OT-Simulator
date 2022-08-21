@@ -65,17 +65,17 @@ double max_ch_water_setpoint = 85;          // Default =  85, updated with MQTT 
 double dhw_setpoint = 65;                   // Default =  65, updated with MQTT topic [ecv/command/dhw_setpoint]
 
 //ECV SENSORS SETTINGS - Default can be adjusted with MQTT message
-double water_pressure_ch = 0;               // Default =  0, updated with MQTT topic [ecv/sensors/water_pressure_ch]
-double outside_temperature = 0;             // Default =  0, updated with MQTT topic [ecv/sensors/outside_temperature]
-double heater_flow_temperature = 0;         // Default =  0, updated with MQTT topic [ecv/sensors/heater_flow_temperature]
-double return_water_temperature = 0;        // Default =  0, updated with MQTT topic [ecv/sensors/return_water_temperature]
-double water_flow_dhw = 0;                  // Default =  0, updated with MQTT topic [ecv/sensors/water_flow_dhw]
-double dhw_temperature = 0;                 // Default =  0, updated with MQTT topic [ecv/sensors/dhw_temperature]
+double water_pressure_ch = 0.00;            // Default =  0, updated with MQTT topic [ecv/sensors/water_pressure_ch]
+double outside_temperature = 0.00;          // Default =  0, updated with MQTT topic [ecv/sensors/outside_temperature]
+double heater_flow_temperature = 0.00;      // Default =  0, updated with MQTT topic [ecv/sensors/heater_flow_temperature]
+double return_water_temperature = 0.00;     // Default =  0, updated with MQTT topic [ecv/sensors/return_water_temperature]
+double water_flow_dhw = 0.00;               // Default =  0, updated with MQTT topic [ecv/sensors/water_flow_dhw]
+double dhw_temperature = 0.00;              // Default =  0, updated with MQTT topic [ecv/sensors/dhw_temperature]
 
 //DEBUG MESSAGE SETTING
 const char* serial_monitor    = "0";        // Default = 0, if set to 1 the OpenTherm traffic will be shown on the serial monitor
 const char* serial_mqtt       = "0";        // Default = 0, if set to 1 all outgoing MQTT related debug messages are shown on the serial terminal
-const char* serial_mqtt_in    = "1";        // Default = 0, if set to 1 all incomming MQTT related debug messages are shown on the serial terminal
+const char* serial_mqtt_in    = "0";        // Default = 0, if set to 1 all incomming MQTT related debug messages are shown on the serial terminal
 const char* serial_range      = "0";        // Default = 0, if set to 1 all range check debug messages are shown on the serial terminal
 const char* serial_update     = "0";        // Default = 0, is set to 1 all value updates are shown on the serial terminal
 const char* serial_convert    = "0";        // Default = 0, if set to 1 all value to hex conversion debug messages are shown on the serial terminal
@@ -939,7 +939,7 @@ void processRequest(unsigned long request, OpenThermResponseStatus status) {
         old_value = msg_value.toDouble();
       } else {
         old_value = msg_value.toDouble();
-        msg_value = water_pressure_ch;
+        msg_value = String(water_pressure_ch,2);
       }
     }
 
@@ -950,7 +950,7 @@ void processRequest(unsigned long request, OpenThermResponseStatus status) {
         old_value = msg_value.toDouble();
       } else {
         old_value = msg_value.toDouble();
-        msg_value = water_flow_dhw;
+        msg_value = String(water_flow_dhw,2);
       }
     }
 
@@ -1036,7 +1036,7 @@ void processRequest(unsigned long request, OpenThermResponseStatus status) {
         old_value = msg_value.toDouble();
       } else {
         old_value = msg_value.toDouble();
-        msg_value = String(dhw_setpoint);
+        msg_value = String(dhw_setpoint,2);
       }
     }
 
