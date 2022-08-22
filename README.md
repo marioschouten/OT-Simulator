@@ -7,25 +7,26 @@
 - 1-Wire thermometers for boiler water temperature and return temperature
 
 ### Software:
-The software will simulate the function of a central heating system and answer the incoming messages from a thermostat. The software can be controlled with MQTT messages, the protocol message reporting will be send via MQTT to /ecv/theremostat/rwadata/rx and ecv/thermostat/rawdata/tx
+The software will simulate a central heating system and reply to the incoming messages from a thermostat. The OT-Simulator software can be controlled with MQTT messages, protocol message traffic will be send via MQTT to topic /ecv/theremostat/rwadata/rx and ecv/thermostat/rawdata/tx
 
 ### Our implementation
-Our implementation is a thermostat connected to a heat pump, the OpenTerm output of the heat pump is connected to the OT-Simulator. The OT-Simulator will send by MQTT a message to OpenHAB with the modulation and CH requested and OpenHAB will then switch the 3 coils of a E-CV in seven steps. The original E-CV is a 9kW on/off type modified using SSR to switch the three coils in different configurations to create 7 power levels.
+Our implementation is a Honeywell Chronterm Touch Modulation thermostat connected to a ELGA heat pump, the OpenTerm output of the heat pump is connected to the OT-Simulator. The OT-Simulator will send by MQTT a message to OpenHAB with the modulation and CH requested values and OpenHAB will then switch the 3 coils of a Mini Europe+ with Wilo Yonos para 15/7 E-CV in seven steps. The E-CV is a 9kW on/off type modified using SSR (Solid State Relays) to switch the three coils in different configurations to create 7 power levels.
+
 ### The following is implemented: 
 * The commands to update setpoints are set via MQTT topic [ecv/command] in the format as described below.
 * The heater operational status is set via MQTT topic [ecv/status] with the format as described below.
 * The various measurements of temperature, pressure, flow etc. are set via MTT topic [ecv/sensors] or 1-wire sensors.
 
+**Values**
+The software is working with double values and expects all values to be send in the format 0.00 (example: 75.00 or 25.34)
 
-**Messages from thermostat to OpenHAB**
-In our setup this is the decoded OpenTerm protocol comming from the heat pump with live temperature reading added. 
-
+**Messages from OT Simulator**
 Topic | Description
 ------|------------
 ecv/thermostat/ch_requested | CH requested
 ecv/thermostat/modulation | Modulation requested by thermostat
 ecv/thermostat/boilertemp | Boiler temperature 
-tecv/hermostat/returntemp | Return temperature 
+ecv/hermostat/returntemp | Return temperature 
 
 
 **COMMANDS to override defaults**
@@ -62,3 +63,11 @@ _not supported_ | _0_ | _CH2 Mode_
 _not supported_ | _0_ | _Diagnostics_
 _not supported_ | _0_ | _Reserved_
 
+**TESTING**
+Please see a NodeRED Node in /test/flows.json that will provide all MQTT topics for easy testing of the OT-Simulator. 
+
+The OT-Simulator can be tested by sending the 8 bytes of hex data to the OT-Simulator on MQTT topic ecv/rawdata/command, see the NodeRED Node example for test commands. This feature is useful if you do not have (yet) Ihor Melnyk's slave Terminal adapter for communication.
+
+
+**AND LAST**
+This software was specifically developed for a single project and is made publicly available for information sharing purpose only without any guarantees, support etc.  
