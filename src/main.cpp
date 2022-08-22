@@ -23,20 +23,20 @@
 #include <AsyncElegantOTA.h>
 
 
-//WiFi parameters Hulst
+//WiFi parameters
 #ifndef STASSID
 //-------Production
-#define STASSID "Kievit29"             // Enter your Wi-Fi SSID here
-#define STAPSK  "JanSchouten71"        // Enter your Wi-Fi password here
+#define STASSID "wifi name"            // Enter your Wi-Fi SSID here
+#define STAPSK  "password"             // Enter your Wi-Fi password here
 
 #endif
 
 //MQTT parameters
 //--------Prodcution
-const char* mqtt_server   = "192.168.11.26";     // Enter your MQTT broker IP or FQDN here
+const char* mqtt_server   = "IP or hostname";    // Enter your MQTT broker IP or FQDN here
 const int   mqtt_port     = 1883;                // Enter your MQTT port number here (Note: No secure port supported)
-const char* mqtt_user     = "smartbroker";       // Enter your MQTT Broker username here
-const char* mqtt_password = "kievit@hulst";      // Enter your MQTT Broker password here
+const char* mqtt_user     = "username";          // Enter your MQTT Broker username here
+const char* mqtt_password = "password";          // Enter your MQTT Broker password here
 
 //OpenTherm input and output wires connected to 4 and 5 pins on the OpenTherm Shield
 const int inPin = 12;  //for Arduino, 12 for ESP8266 (D6), 19 for ESP32
