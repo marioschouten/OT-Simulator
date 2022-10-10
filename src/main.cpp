@@ -23,7 +23,7 @@
 #include <AsyncElegantOTA.h>
 
 
-//WiFi parameters Hulst
+//WiFi parameters
 #ifndef STASSID
 //-------Production
 #define STASSID "Kievit29"             // Enter your Wi-Fi SSID here
@@ -60,12 +60,12 @@ const char* msg_0_bit_7 = "0";              // Reserved
 
 //ECV COMMAND SETTINGS - Default can be adjusted with MQTT message
 double max_rel_modulation = 100;            // Default = 100, updated with MQTT topic [ecv/command/max_rel_modulation]
-double control_ch_setpoint = 75;            // Default =  75, updated with MQTT topic [ecv/command/control_ch_setpoint]
+//double control_ch_setpoint = 75;            // Default =  75, updated with MQTT topic [ecv/command/control_ch_setpoint]
 double max_ch_water_setpoint = 85;          // Default =  85, updated with MQTT topic [ecv/command/max_ch_water_setpoint]
 double dhw_setpoint = 65;                   // Default =  65, updated with MQTT topic [ecv/command/dhw_setpoint]
 
 //ECV SENSORS SETTINGS - Default can be adjusted with MQTT message
-double water_pressure_ch = 0.00;            // Default =  0, updated with MQTT topic [ecv/sensors/water_pressure_ch]
+double water_pressure_ch = 2.00;            // Default =  2, updated with MQTT topic [ecv/sensors/water_pressure_ch]
 double outside_temperature = 0.00;          // Default =  0, updated with MQTT topic [ecv/sensors/outside_temperature]
 double heater_flow_temperature = 0.00;      // Default =  0, updated with MQTT topic [ecv/sensors/heater_flow_temperature]
 double return_water_temperature = 0.00;     // Default =  0, updated with MQTT topic [ecv/sensors/return_water_temperature]
@@ -454,16 +454,16 @@ void callback(char* topic, byte* payload, unsigned int length) {
   }
 
   //MQTT TOPIC is [ecv/command/control_ch_setpoint], set the corresponding variables
-  if (strcmp(topic, "ecv/command/control_ch_setpoint") == 0) {
-    String test = String((char*)payload);
-    control_ch_setpoint = test.toDouble();
-    //DEBUG_MQTT: Print payload of MQTT message with topic [ecv/sensors/flame]
-    if (strcmp(serial_mqtt_in, "1") == 0 ) {
-      Serial.print("   Set control CH setpoint: ");
-      Serial.print(control_ch_setpoint);
-      Serial.println();
-    }
-  }
+  //if (strcmp(topic, "ecv/command/control_ch_setpoint") == 0) {
+  //  String test = String((char*)payload);
+  //   control_ch_setpoint = test.toDouble();
+  //  //DEBUG_MQTT: Print payload of MQTT message with topic [ecv/sensors/flame]
+  //  if (strcmp(serial_mqtt_in, "1") == 0 ) {
+  //    Serial.print("   Set control CH setpoint: ");
+  //    Serial.print(control_ch_setpoint);
+  //    Serial.println();
+  //  }
+  //}
 
   //MQTT TOPIC is [ecv/command/max_ch_water_setpoint], set the corresponding variables
   if (strcmp(topic, "ecv/command/max_ch_water_setpoint") == 0) {
@@ -623,7 +623,7 @@ void reconnect() {
       client.subscribe("ecv/status/ch_mode");
       client.subscribe("ecv/status/flame");
       client.subscribe("ecv/command/max_rel_modulation");
-      client.subscribe("ecv/command/control_ch_setpoint");
+      //client.subscribe("ecv/command/control_ch_setpoint");
       client.subscribe("ecv/command/max_ch_water_setpoint");
       client.subscribe("ecv/command/dhw_setpoint");
       client.subscribe("ecv/sensors/water_pressure_ch");
@@ -923,13 +923,13 @@ void processRequest(unsigned long request, OpenThermResponseStatus status) {
 
     //Check the ID 01 Control CH setpoint
     if (msg_id == "01"){
-      //Compare the received value with the default(MQTT update value)
-      if (msg_value.toDouble() == control_ch_setpoint) {
-        old_value = msg_value.toDouble();
-      } else {
-        old_value = msg_value.toDouble();
-        msg_value = control_ch_setpoint;
-      }
+      //Correction in software, allways report back the received value
+      //if (msg_value.toDouble() == control_ch_setpoint) {
+      old_value = msg_value.toDouble();
+      // } else {
+      //  old_value = msg_value.toDouble();
+      //  msg_value = control_ch_setpoint;
+      //}
     }   
 
    //Check the ID 18 Water pressure
