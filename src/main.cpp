@@ -46,7 +46,7 @@ OpenTherm ot(inPin, outPin, true);
 // OneWire DS18S20, DS18B20, DS1822 Temperature sensor integration
 #define ONE_WIRE_PIN D3  // on pin D3 (a 4.7K resistor is necessary)
 //Openterm Leader Follower response timing (Min. 20ms - max. 800ms)
-unsigned int timing       = 125; // Default timing is 25ms
+unsigned int timing       = 250; // Default timing is 25ms
 
 //ECV STATUS SETTINGS - Default can be adjusted with MQTT message
 const char* fault_indication = "0";         // Default = 0, updated with MQTT topic [ecv/status/fault]
@@ -73,14 +73,14 @@ double water_flow_dhw = 0.00;               // Default =  0, updated with MQTT t
 double dhw_temperature = 0.00;              // Default =  0, updated with MQTT topic [ecv/sensors/dhw_temperature]
 
 //DEBUG MESSAGE SETTING
-const char* serial_monitor    = "0";        // Default = 0, if set to 1 the OpenTherm traffic will be shown on the serial monitor
+const char* serial_monitor    = "1";        // Default = 0, if set to 1 the OpenTherm traffic will be shown on the serial monitor
 const char* serial_mqtt       = "0";        // Default = 0, if set to 1 all outgoing MQTT related debug messages are shown on the serial terminal
 const char* serial_mqtt_in    = "0";        // Default = 0, if set to 1 all incomming MQTT related debug messages are shown on the serial terminal
 const char* serial_range      = "0";        // Default = 0, if set to 1 all range check debug messages are shown on the serial terminal
 const char* serial_update     = "0";        // Default = 0, is set to 1 all value updates are shown on the serial terminal
 const char* serial_convert    = "0";        // Default = 0, if set to 1 all value to hex conversion debug messages are shown on the serial terminal
 const char* serial_onewire    = "0";        // Default = 0, if set to 1 the system will print a list of device addresses to the terminal
-const char* serial_debug      = "0";        // Default = 0, if set to 1 debug messages are shown on the serial monitor
+const char* serial_debug      = "1";        // Default = 0, if set to 1 debug messages are shown on the serial monitor
 
 
 //Internal program variables, DO NOT CHANGE
@@ -1259,8 +1259,7 @@ void processRequest(unsigned long request, OpenThermResponseStatus status) {
 
 // -----------------------------------------------------------SETUP--------------------------------------------------------------
 //SETUP This code will run once and setup WiFi, set t(ime)s(tamp), call OT interrupt, setup MQTT server, client topic, payload and length.
-void setup()
-{
+void setup() {
   //Set serial speed for serial monitor
   Serial.begin(9600);
   Serial.println();
@@ -1286,7 +1285,7 @@ void setup()
 
   //OTA 
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send(200, "text/plain", "Hi! I am ESP8266 on the KivietServer.");
+    request->send(200, "text/plain", "Hi! I am the E-CV running on a ESP8266 .");
   });
 
   AsyncElegantOTA.begin(&server);    // Start ElegantOTA
