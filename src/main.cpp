@@ -26,17 +26,17 @@
 //WiFi parameters
 #ifndef STASSID
 //-------Production
-#define STASSID "Kievit29"            // Enter your Wi-Fi SSID here
-#define STAPSK  "JanSchouten71"             // Enter your Wi-Fi password here
+#define STASSID "Kievit29"                       // Enter your Wi-Fi SSID here
+#define STAPSK  "your_password"                  // Enter your Wi-Fi password here
 
 #endif
 
 //MQTT parameters
 //--------Prodcution
-const char* mqtt_server   = "192.168.11.26";    // Enter your MQTT broker IP or FQDN here
+const char* mqtt_server   = "192.168.11.26";     // Enter your MQTT broker IP or FQDN here
 const int   mqtt_port     = 1883;                // Enter your MQTT port number here (Note: No secure port supported)
-const char* mqtt_user     = "smartbroker";          // Enter your MQTT Broker username here
-const char* mqtt_password = "kievit@hulst";          // Enter your MQTT Broker password here
+const char* mqtt_user     = "smartbroker";       // Enter your MQTT Broker username here
+const char* mqtt_password = "kievit@hulst";      // Enter your MQTT Broker password here
 
 //OpenTherm input and output wires connected to 4 and 5 pins on the OpenTherm Shield
 const int inPin = 12;  //for Arduino, 12 for ESP8266 (D6), 19 for ESP32
@@ -715,7 +715,6 @@ void processRequest(unsigned long request, OpenThermResponseStatus status) {
   f2l_parity                  = 0;
   msg_value_follower          = "";
 
-
   //Build incoming message into a String msg_heater
   msg_heater = String(request, HEX);
   while (msg_heater.length() < 8 ) {
@@ -768,9 +767,9 @@ void processRequest(unsigned long request, OpenThermResponseStatus status) {
 
   //DEBUG_DEBUG: Print the received message ID and description to the serial monitor
   if (strcmp(serial_debug, "1") == 0 ) {
-    Serial.print("Decoded message ID: ");
+    Serial.print("Decoded message ID:");
     Serial.print(msg_id);
-    Serial.print(" with description: ");
+    Serial.print(" with description:");
     Serial.print(msg_description);
     Serial.print(" parity count:");
     Serial.print(f2l_parity);
@@ -781,7 +780,7 @@ void processRequest(unsigned long request, OpenThermResponseStatus status) {
   if (strcmp(msg_flag, "flag8") == 0) {
     msg_value_leader = msg_pos[4] + msg_pos[5];
     msg_value_leader = decode_flag_flag8(msg_value_leader);
-    
+
     //Publish the received OpenTherm message with flag flag8/flag8 to MQTT
     String msg_full = "T-" +msg_heater + " " + l2f_message + " " + msg_description + msg_value_leader;
 
@@ -1152,7 +1151,7 @@ void processRequest(unsigned long request, OpenThermResponseStatus status) {
 
   //Build the string for message type 00 and 03 else build all other message type strings
   if (msg_id == "00" || msg_id == "03") {
-    msg_full = msg_thermostat + " " + f2l_message + " " +msg_description + " " + msg_value_leader + " " + msg_value_follower;
+    msg_full = msg_thermostat + " " + f2l_message + " " + msg_description + msg_value_leader + " " + msg_value_follower;
   } else {
     msg_full = msg_thermostat + " " + f2l_message + " " + msg_description + " " + msg_value;
   }

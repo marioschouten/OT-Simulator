@@ -26,14 +26,13 @@ Topic | Description
 ecv/thermostat/ch_requested | CH requested
 ecv/thermostat/modulation | Modulation requested by thermostat
 ecv/thermostat/boilertemp | Boiler temperature 
-ecv/hermostat/returntemp | Return temperature 
+ecv/thermostat/returntemp | Return temperature 
 
 
 **COMMANDS to override defaults**
 topic | default | Description
 ------|------------|--------
 ecv/command/max_rel_modulation | 100 | max_rel_modulation
-ecv/command/control_ch_setpoint |75 | control_ch_setpoint
 ecv/command/max_ch_water_setpoint | 85 | max_ch_water_setpoint
 ecv/command/dhw_setpoint | 0 | dhw_setpoint
 
