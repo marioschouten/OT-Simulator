@@ -1,4 +1,4 @@
-//Version 1.2 by Mario M.C. Schouten
+//Version 1.2.1 by Mario M.C. Schouten
 //
 //Arduino Wemo D1 mini based E-C(entral)H(eating) follower using OpenTherm protocol and Ihor Melnyk's slave Terminal adapter for communication.
 //
@@ -26,17 +26,17 @@
 //WiFi parameters
 #ifndef STASSID
 //-------Production
-#define STASSID "wifi name"            // Enter your Wi-Fi SSID here
-#define STAPSK  "password"             // Enter your Wi-Fi password here
+#define STASSID "Kievit29"            // Enter your Wi-Fi SSID here
+#define STAPSK  "JanSchouten71"             // Enter your Wi-Fi password here
 
 #endif
 
 //MQTT parameters
 //--------Prodcution
-const char* mqtt_server   = "IP or hostname";    // Enter your MQTT broker IP or FQDN here
+const char* mqtt_server   = "192.168.11.26";    // Enter your MQTT broker IP or FQDN here
 const int   mqtt_port     = 1883;                // Enter your MQTT port number here (Note: No secure port supported)
-const char* mqtt_user     = "username";          // Enter your MQTT Broker username here
-const char* mqtt_password = "password";          // Enter your MQTT Broker password here
+const char* mqtt_user     = "smartbroker";          // Enter your MQTT Broker username here
+const char* mqtt_password = "kievit@hulst";          // Enter your MQTT Broker password here
 
 //OpenTherm input and output wires connected to 4 and 5 pins on the OpenTherm Shield
 const int inPin = 12;  //for Arduino, 12 for ESP8266 (D6), 19 for ESP32
@@ -73,14 +73,14 @@ double water_flow_dhw = 0.00;               // Default =  0, updated with MQTT t
 double dhw_temperature = 0.00;              // Default =  0, updated with MQTT topic [ecv/sensors/dhw_temperature]
 
 //DEBUG MESSAGE SETTING
-const char* serial_monitor    = "1";        // Default = 0, if set to 1 the OpenTherm traffic will be shown on the serial monitor
+const char* serial_monitor    = "0";        // Default = 0, if set to 1 the OpenTherm traffic will be shown on the serial monitor
 const char* serial_mqtt       = "0";        // Default = 0, if set to 1 all outgoing MQTT related debug messages are shown on the serial terminal
 const char* serial_mqtt_in    = "0";        // Default = 0, if set to 1 all incomming MQTT related debug messages are shown on the serial terminal
 const char* serial_range      = "0";        // Default = 0, if set to 1 all range check debug messages are shown on the serial terminal
 const char* serial_update     = "0";        // Default = 0, is set to 1 all value updates are shown on the serial terminal
 const char* serial_convert    = "0";        // Default = 0, if set to 1 all value to hex conversion debug messages are shown on the serial terminal
 const char* serial_onewire    = "0";        // Default = 0, if set to 1 the system will print a list of device addresses to the terminal
-const char* serial_debug      = "1";        // Default = 0, if set to 1 debug messages are shown on the serial monitor
+const char* serial_debug      = "0";        // Default = 0, if set to 1 debug messages are shown on the serial monitor
 
 
 //Internal program variables, DO NOT CHANGE
@@ -249,7 +249,6 @@ String decode_flag_f8(String msg_value) {
     Serial.print(dec_val);
     Serial.print(" and divided by 256: ");
     Serial.print(dec_val/256);
-    Serial.print(msg_value);
     Serial.println();
   }
 
@@ -748,7 +747,7 @@ void processRequest(unsigned long request, OpenThermResponseStatus status) {
   if (msg_id == "03") {msg_description = "Follower config flags and Leader MemberID code: ";      msg_flag = "flag8"; msg_rw = "R"; f2l_parity = f2l_parity + 2;} //Decimal 3
   if (msg_id == "05") {msg_description = "Application-specific and OEM fault flags: ";            msg_flag = "u8"  ;  msg_rw = "R"; f2l_parity = f2l_parity + 2;} //Decimal 5
   if (msg_id == "0e") {msg_description = "Maximum relative modulation level setting (%): ";       msg_flag = "f8.8";  msg_rw = "W"; f2l_parity = f2l_parity + 3; range_low =   0; range_high = 100;} //Decimal 14
-  if (msg_id == "10") {msg_description = "Control setpoint CH water temperature: ";               msg_flag = "f8.8";  msg_rw = "W"; f2l_parity = f2l_parity + 1; range_low = -40; range_high = 127;} //Decimal 16
+  if (msg_id == "10") {msg_description = "Room setpoint: ";                                       msg_flag = "f8.8";  msg_rw = "W"; f2l_parity = f2l_parity + 1; range_low = -40; range_high = 127;} //Decimal 16
   if (msg_id == "11") {msg_description = "Relative modulation level (%): ";                       msg_flag = "f8.8";  msg_rw = "R"; f2l_parity = f2l_parity + 2; range_low =   0; range_high = 100;} //Decimal 17
   if (msg_id == "12") {msg_description = "Water pressure in CH circuit (bar): ";                  msg_flag = "f8.8";  msg_rw = "R"; f2l_parity = f2l_parity + 2; range_low =   0; range_high =   5;} //Decimal 18
   if (msg_id == "13") {msg_description = "Water flow rate in DHW circuit (litres/minute): ";      msg_flag = "f8.8";  msg_rw = "R"; f2l_parity = f2l_parity + 3; range_low =   0; range_high =  16;} //Decimal 19
@@ -919,17 +918,21 @@ void processRequest(unsigned long request, OpenThermResponseStatus status) {
   }
 
   //CHECK if there are updated default or MQTT received values to report back to the ecv/thermostat/*
-  if (msg_id == "01" || msg_id == "12" || msg_id == "13" || msg_id == "19" || msg_id == "0e" || msg_id == "1a" || msg_id == "1b"|| msg_id == "1c" || msg_id == "38" || msg_id == "39") {
+  if (msg_id == "01" || msg_id == "10" || msg_id == "11" || msg_id == "12" || msg_id == "13" || msg_id == "18" || msg_id == "19" || msg_id == "0e" || msg_id == "1a" || msg_id == "1b"|| msg_id == "1c" || msg_id == "38" || msg_id == "39") {
 
     //Check the ID 01 Control CH setpoint
-    if (msg_id == "01"){
-      //Correction in software, allways report back the received value
-      //if (msg_value.toDouble() == control_ch_setpoint) {
+    if (msg_id == "01") {
       old_value = msg_value.toDouble();
-      // } else {
-      //  old_value = msg_value.toDouble();
-      //  msg_value = control_ch_setpoint;
-      //}
+    }   
+
+    //Check the ID 16 Room setpoint
+    if (msg_id == "10") {
+      old_value = msg_value.toDouble();
+    }  
+
+    //Check the ID 17 Control CH setpoint
+    if (msg_id == "11") {
+      old_value = msg_value.toDouble();
     }   
 
    //Check the ID 18 Water pressure
@@ -986,7 +989,12 @@ void processRequest(unsigned long request, OpenThermResponseStatus status) {
       }
     }
 
-   //Check the ID 26 DHW Temperature
+    //Check the ID 24 Room temperature
+    if (msg_id == "18") {
+      old_value = msg_value.toDouble();
+    }  
+
+    //Check the ID 26 DHW Temperature
     if (msg_id == "1A"){
       //Compare the received value with the default(MQTT update value)
       if (msg_value.toDouble() == dhw_temperature ) {
@@ -1179,7 +1187,7 @@ void processRequest(unsigned long request, OpenThermResponseStatus status) {
     }
   }
 
-  //Delay 20ms to meet protocol requirements
+  //Delay pre-set ms to meet protocol requirements
   unsigned long now = millis();
   while (now - msg_rx_ts < timing) {
     now = millis();
@@ -1242,9 +1250,17 @@ void processRequest(unsigned long request, OpenThermResponseStatus status) {
       base = base * 16;
     } 
 
-    // if character lies in 'A'-'F' , converting it to integral 10 - 15 by subtracting 55 from ASCII value
+    // if character lies in 'a'-'f' , converting it to integral 10 - 15 by subtracting 87 from ASCII value
     else if (msg_value[i]>='a' && msg_value[i]<='f') {
         dec_val += (msg_value[i] - 87)*base;
+
+        // incrementing base by power
+        base = base*16;
+    }
+
+    // if character lies in 'A'-'F' , converting it to integral 10 - 15 by subtracting 55 from ASCII value
+    else if (msg_value[i]>='A' && msg_value[i]<='F') {
+        dec_val += (msg_value[i] - 55)*base;
 
         // incrementing base by power
         base = base*16;
