@@ -1,4 +1,4 @@
-//Version 1.2.1 by Mario M.C. Schouten
+//Version 1.2.2 by Mario M.C. Schouten
 //
 //Arduino Wemo D1 mini based E-C(entral)H(eating) follower using OpenTherm protocol and Ihor Melnyk's slave Terminal adapter for communication.
 //
@@ -21,22 +21,20 @@
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <AsyncElegantOTA.h>
+#include <settings.h>
 
 
 //WiFi parameters
 #ifndef STASSID
-//-------Production
-#define STASSID "Kievit29"                       // Enter your Wi-Fi SSID here
-#define STAPSK  "your_password"                  // Enter your Wi-Fi password here
-
+  const char* STASSID = WIFI_SSID;
+  const char* STAPSK  = WIFI_PASSWORD;
 #endif
 
 //MQTT parameters
-//--------Prodcution
-const char* mqtt_server   = "192.168.11.26";     // Enter your MQTT broker IP or FQDN here
-const int   mqtt_port     = 1883;                // Enter your MQTT port number here (Note: No secure port supported)
-const char* mqtt_user     = "smartbroker";       // Enter your MQTT Broker username here
-const char* mqtt_password = "kievit@hulst";      // Enter your MQTT Broker password here
+const char* mqtt_server   = MQTT_HOST;
+const int   mqtt_port     = MQTT_PORT; 
+const char* mqtt_user     = MQTT_USER;
+const char* mqtt_password = MQTT_PASSWORD;
 
 //OpenTherm input and output wires connected to 4 and 5 pins on the OpenTherm Shield
 const int inPin = 12;  //for Arduino, 12 for ESP8266 (D6), 19 for ESP32
@@ -591,8 +589,9 @@ void callback(char* topic, byte* payload, unsigned int length) {
       Serial.println();
     }
 
+
     //Decode incoming message and send reply
-    //analyse_response(msg_pos);
+    //processRequest(msg_pos);
   }
 }
 
@@ -1355,7 +1354,15 @@ void loop() {
   unsigned long now = millis();
   if (now - last_temp > 5000) {
     read_temperature();
+
+    //Publish the boiler returntemperature to MQTT [ecv/thermostat/returntemp]
+    String msg_with_return_temp = String(return_temp);
+    snprintf (msg, MSG_BUFFER_SIZE, msg_with_return_temp.c_str());
+    client.publish("ecv/thermostat/returntemp", msg);
+
+    //Reset timer
     last_temp = millis();
+
   }
 
   void loop();
