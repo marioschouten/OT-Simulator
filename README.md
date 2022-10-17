@@ -65,7 +65,7 @@ _not supported_ | _0_ | _Reserved_
 **TESTING**
 Please see a NodeRED Node in /test/flows.json that will provide all MQTT topics for easy testing of the OT-Simulator. 
 
-The OT-Simulator can be tested by sending the 8 bytes of hex data to the OT-Simulator on MQTT topic ecv/rawdata/command, see the NodeRED Node example for test commands. This feature is useful if you do not have (yet) Ihor Melnyk's slave Terminal adapter for communication (FUNCTION IS DISABLED, NEED WORK)
+The OT-Simulator can be tested by sending the 8 bytes of hex data to the OT-Simulator on MQTT topic ecv/rawdata/command, see the NodeRED Node example for test commands. This feature is useful if you do not have (yet) Ihor Melnyk's slave Terminal adapter for communication (FUNCTION IS DISABLED, NEEDS WORK)
 
 
 **AND LAST**
