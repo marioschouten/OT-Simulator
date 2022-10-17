@@ -365,4 +365,4 @@ FodyWeavers.xsd
 # Setting files
 settings.operational
 settings.test
-settings.cpp
+settings.h
