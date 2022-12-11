@@ -745,9 +745,9 @@ void processRequest(unsigned long request, OpenThermResponseStatus status) {
   if (msg_id == "01") {msg_description = "Control setpoint CH water temperature (C): ";           msg_flag = "f8.8";  msg_rw = "W"; f2l_parity = f2l_parity + 1; range_low =   0; range_high = 100;} //Decimal 1
   if (msg_id == "03") {msg_description = "Follower config flags and Leader MemberID code: ";      msg_flag = "flag8"; msg_rw = "R"; f2l_parity = f2l_parity + 2;} //Decimal 3
   if (msg_id == "05") {msg_description = "Application-specific and OEM fault flags: ";            msg_flag = "u8"  ;  msg_rw = "R"; f2l_parity = f2l_parity + 2;} //Decimal 5
-  if (msg_id == "0e") {msg_description = "Maximum relative modulation level setting (%): ";       msg_flag = "f8.8";  msg_rw = "W"; f2l_parity = f2l_parity + 3; range_low =   0; range_high = 100;} //Decimal 14
+  if (msg_id == "0e") {msg_description = "Maximum relative modulation level setting (Percent): ";       msg_flag = "f8.8";  msg_rw = "W"; f2l_parity = f2l_parity + 3; range_low =   0; range_high = 100;} //Decimal 14
   if (msg_id == "10") {msg_description = "Room setpoint: ";                                       msg_flag = "f8.8";  msg_rw = "W"; f2l_parity = f2l_parity + 1; range_low = -40; range_high = 127;} //Decimal 16
-  if (msg_id == "11") {msg_description = "Relative modulation level (%): ";                       msg_flag = "f8.8";  msg_rw = "R"; f2l_parity = f2l_parity + 2; range_low =   0; range_high = 100;} //Decimal 17
+  if (msg_id == "11") {msg_description = "Relative modulation level (Percent): ";                       msg_flag = "f8.8";  msg_rw = "R"; f2l_parity = f2l_parity + 2; range_low =   0; range_high = 100;} //Decimal 17
   if (msg_id == "12") {msg_description = "Water pressure in CH circuit (bar): ";                  msg_flag = "f8.8";  msg_rw = "R"; f2l_parity = f2l_parity + 2; range_low =   0; range_high =   5;} //Decimal 18
   if (msg_id == "13") {msg_description = "Water flow rate in DHW circuit (litres/minute): ";      msg_flag = "f8.8";  msg_rw = "R"; f2l_parity = f2l_parity + 3; range_low =   0; range_high =  16;} //Decimal 19
   if (msg_id == "18") {msg_description = "Room temperature (C): ";                                msg_flag = "f8.8";  msg_rw = "W"; f2l_parity = f2l_parity + 2; range_low = -40; range_high = 127;} //Decimal 24
@@ -921,19 +921,6 @@ void processRequest(unsigned long request, OpenThermResponseStatus status) {
 
     //Check the ID 01 Control CH setpoint
     if (msg_id == "01") {
-<<<<<<< HEAD
-      old_value = msg_value.toDouble();
-    }   
-
-    //Check the ID 16 Room setpoint
-    if (msg_id == "10") {
-      old_value = msg_value.toDouble();
-    }  
-
-    //Check the ID 17 Control CH setpoint
-    if (msg_id == "11") {
-      old_value = msg_value.toDouble();
-=======
       old_value = msg_value.toDouble();
       control_ch_setpoint = msg_value.toDouble();
     }
@@ -952,7 +939,6 @@ void processRequest(unsigned long request, OpenThermResponseStatus status) {
         old_value = msg_value.toDouble();
         msg_value = String(calc_modulation_percent,2);
       }
->>>>>>> ded95e22fb0e92cb8331882738133ffd7c8b1cfd
     }   
 
    //Check the ID 18 Water pressure
