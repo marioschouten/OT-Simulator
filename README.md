@@ -26,14 +26,13 @@ Topic | Description
 ecv/thermostat/ch_requested | CH requested
 ecv/thermostat/modulation | Modulation requested by thermostat
 ecv/thermostat/boilertemp | Boiler temperature 
-ecv/hermostat/returntemp | Return temperature 
+ecv/thermostat/returntemp | Return temperature 
 
 
 **COMMANDS to override defaults**
 topic | default | Description
 ------|------------|--------
 ecv/command/max_rel_modulation | 100 | max_rel_modulation
-ecv/command/control_ch_setpoint |75 | control_ch_setpoint
 ecv/command/max_ch_water_setpoint | 85 | max_ch_water_setpoint
 ecv/command/dhw_setpoint | 0 | dhw_setpoint
 
@@ -66,7 +65,7 @@ _not supported_ | _0_ | _Reserved_
 **TESTING**
 Please see a NodeRED Node in /test/flows.json that will provide all MQTT topics for easy testing of the OT-Simulator. 
 
-The OT-Simulator can be tested by sending the 8 bytes of hex data to the OT-Simulator on MQTT topic ecv/rawdata/command, see the NodeRED Node example for test commands. This feature is useful if you do not have (yet) Ihor Melnyk's slave Terminal adapter for communication.
+The OT-Simulator can be tested by sending the 8 bytes of hex data to the OT-Simulator on MQTT topic ecv/rawdata/command, see the NodeRED Node example for test commands. This feature is useful if you do not have (yet) Ihor Melnyk's slave Terminal adapter for communication (FUNCTION IS DISABLED, NEEDS WORK)
 
 
 **AND LAST**
