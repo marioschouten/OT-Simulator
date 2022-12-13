@@ -59,8 +59,9 @@ const char* msg_0_bit_7 = "0";              // Reserved
 
 //ECV COMMAND SETTINGS - Default can be adjusted with MQTT message
 double max_rel_modulation = 100;            // Default = 100, updated with MQTT topic [ecv/command/max_rel_modulation]
-double max_ch_water_setpoint = 85;          // Default =  85, updated with MQTT topic [ecv/command/max_ch_water_setpoint]
+double max_ch_water_setpoint = 70;          // Default =  70, updated with MQTT topic [ecv/command/max_ch_water_setpoint]
 double dhw_setpoint = 65;                   // Default =  65, updated with MQTT topic [ecv/command/dhw_setpoint]
+double set_modulation = 75;                 // Default =  75, updated with MQTT topic [ecv/command/set_modulation]  (FOR TEST PURPOSE)
 
 //ECV SENSORS SETTINGS - Default can be adjusted with MQTT message
 double water_pressure_ch = 2.00;            // Default =  2, updated with MQTT topic [ecv/sensors/water_pressure_ch]
@@ -437,7 +438,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     if ((char)payload[0] == 49 ) {
       follower_status[4] = 1; 
       //BUILD the thermostat here!!!! 
-      calc_modulation_percent = 35.00;
+      calc_modulation_percent = set_modulation;
 
 
 
@@ -483,6 +484,17 @@ void callback(char* topic, byte* payload, unsigned int length) {
     if (strcmp(serial_mqtt_in, "1") == 0 ) {
       Serial.print("   Set DHW setpoint: ");
       Serial.print(dhw_setpoint);
+      Serial.println();
+    }
+  }
+
+  //MQTT TOPIC is [ecv/command/set_modulation], set the corresponding variables
+  if (strcmp(topic, "ecv/command/set_modulation") == 0) {
+    set_modulation = atoi((char *)payload);
+    //DEBUG_MQTT: Print payload of MQTT message
+    if (strcmp(serial_mqtt_in, "1") == 0 ) {
+      Serial.print("   Set Modulation: ");
+      Serial.print(set_modulation);
       Serial.println();
     }
   }
@@ -745,9 +757,9 @@ void processRequest(unsigned long request, OpenThermResponseStatus status) {
   if (msg_id == "01") {msg_description = "Control setpoint CH water temperature (C): ";           msg_flag = "f8.8";  msg_rw = "W"; f2l_parity = f2l_parity + 1; range_low =   0; range_high = 100;} //Decimal 1
   if (msg_id == "03") {msg_description = "Follower config flags and Leader MemberID code: ";      msg_flag = "flag8"; msg_rw = "R"; f2l_parity = f2l_parity + 2;} //Decimal 3
   if (msg_id == "05") {msg_description = "Application-specific and OEM fault flags: ";            msg_flag = "u8"  ;  msg_rw = "R"; f2l_parity = f2l_parity + 2;} //Decimal 5
-  if (msg_id == "0e") {msg_description = "Maximum relative modulation level setting (Percent): ";       msg_flag = "f8.8";  msg_rw = "W"; f2l_parity = f2l_parity + 3; range_low =   0; range_high = 100;} //Decimal 14
+  if (msg_id == "0e") {msg_description = "Maximum relative modulation level setting (Percent): "; msg_flag = "f8.8";  msg_rw = "W"; f2l_parity = f2l_parity + 3; range_low =   0; range_high = 100;} //Decimal 14
   if (msg_id == "10") {msg_description = "Room setpoint: ";                                       msg_flag = "f8.8";  msg_rw = "W"; f2l_parity = f2l_parity + 1; range_low = -40; range_high = 127;} //Decimal 16
-  if (msg_id == "11") {msg_description = "Relative modulation level (Percent): ";                       msg_flag = "f8.8";  msg_rw = "R"; f2l_parity = f2l_parity + 2; range_low =   0; range_high = 100;} //Decimal 17
+  if (msg_id == "11") {msg_description = "Relative modulation level (Percent): ";                 msg_flag = "f8.8";  msg_rw = "R"; f2l_parity = f2l_parity + 2; range_low =   0; range_high = 100;} //Decimal 17
   if (msg_id == "12") {msg_description = "Water pressure in CH circuit (bar): ";                  msg_flag = "f8.8";  msg_rw = "R"; f2l_parity = f2l_parity + 2; range_low =   0; range_high =   5;} //Decimal 18
   if (msg_id == "13") {msg_description = "Water flow rate in DHW circuit (litres/minute): ";      msg_flag = "f8.8";  msg_rw = "R"; f2l_parity = f2l_parity + 3; range_low =   0; range_high =  16;} //Decimal 19
   if (msg_id == "18") {msg_description = "Room temperature (C): ";                                msg_flag = "f8.8";  msg_rw = "W"; f2l_parity = f2l_parity + 2; range_low = -40; range_high = 127;} //Decimal 24
@@ -930,14 +942,14 @@ void processRequest(unsigned long request, OpenThermResponseStatus status) {
       old_value = msg_value.toDouble();
     }  
 
-    //Check the ID 17 Control CH setpoint
+    //Check the ID 17 Relative modulation level (Percent)
     if (msg_id == "11") {
       //Compare the received value with the default(MQTT update value)
-      if (msg_value.toDouble() == calc_modulation_percent ) {
+      if (msg_value.toDouble() == set_modulation ) {
         old_value = msg_value.toDouble();
       } else {
         old_value = msg_value.toDouble();
-        msg_value = String(calc_modulation_percent,2);
+        msg_value = String(set_modulation,2);
       }
     }   
 
