@@ -1,4 +1,4 @@
-//Version 1.2.2 by Mario M.C. Schouten
+//Version 1.2.3 by Mario M.C. Schouten
 //
 //Arduino Wemo D1 mini based E-C(entral)H(eating) follower using OpenTherm protocol and Ihor Melnyk's slave Terminal adapter for communication.
 //
@@ -61,7 +61,6 @@ const char* msg_0_bit_7 = "0";              // Reserved
 double max_rel_modulation = 100;            // Default = 100, updated with MQTT topic [ecv/command/max_rel_modulation]
 double max_ch_water_setpoint = 70;          // Default =  70, updated with MQTT topic [ecv/command/max_ch_water_setpoint]
 double dhw_setpoint = 65;                   // Default =  65, updated with MQTT topic [ecv/command/dhw_setpoint]
-double set_modulation = 75;                 // Default =  75, updated with MQTT topic [ecv/command/set_modulation]  (FOR TEST PURPOSE)
 
 //ECV SENSORS SETTINGS - Default can be adjusted with MQTT message
 double water_pressure_ch = 2.00;            // Default =  2, updated with MQTT topic [ecv/sensors/water_pressure_ch]
@@ -106,8 +105,9 @@ uint8_t sensor2[8] = {0x28, 0x18, 0xCD, 0x79, 0xA2, 0x00, 0x03, 0x4A};
 DeviceAddress Thermometer;
 
 int deviceCount              = 0;
-unsigned long last_temp      = millis();
-unsigned long last_ch_update = millis();
+unsigned long last_temp              = millis();
+unsigned long last_ch_update         = millis();
+unsigned long last_modulation_update = millis();
 
 //Setup message buffer size
 #define MSG_BUFFER_SIZE (110)
@@ -128,10 +128,12 @@ long int value          = 0;
 int ch_enabled          = 0;
 int ch_enabled_history  = 0;
 
-//Variable for startup modulation level
-double calc_modulation_percent = 0.00;
-double control_ch_setpoint = 0.00;
-
+//Variables for modulation level
+double set_modulation      =  0.00;
+double control_ch_setpoint =  0.00;
+double temp_difference     =  0.00;
+double upper_limit         = 20.00;
+double lower_limit         =  2.00;
 
 
 
@@ -432,17 +434,11 @@ void callback(char* topic, byte* payload, unsigned int length) {
     //Set modulation level based on flame OFF
     if ((char)payload[0] == 48 ) {
       follower_status[4] = 0; 
-      calc_modulation_percent = 0.00;
-      }
+    }
     //Set modulation level based on flame ON
     if ((char)payload[0] == 49 ) {
       follower_status[4] = 1; 
-      //BUILD the thermostat here!!!! 
-      calc_modulation_percent = set_modulation;
-
-
-
-      }
+    }
     //DEBUG_MQTT: Print payload of MQTT message
     if (strcmp(serial_mqtt_in, "1") == 0 ) {
       Serial.print("   Flame status: ");
@@ -484,17 +480,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
     if (strcmp(serial_mqtt_in, "1") == 0 ) {
       Serial.print("   Set DHW setpoint: ");
       Serial.print(dhw_setpoint);
-      Serial.println();
-    }
-  }
-
-  //MQTT TOPIC is [ecv/command/set_modulation], set the corresponding variables
-  if (strcmp(topic, "ecv/command/set_modulation") == 0) {
-    set_modulation = atoi((char *)payload);
-    //DEBUG_MQTT: Print payload of MQTT message
-    if (strcmp(serial_mqtt_in, "1") == 0 ) {
-      Serial.print("   Set Modulation: ");
-      Serial.print(set_modulation);
       Serial.println();
     }
   }
@@ -935,6 +920,27 @@ void processRequest(unsigned long request, OpenThermResponseStatus status) {
     if (msg_id == "01") {
       old_value = msg_value.toDouble();
       control_ch_setpoint = msg_value.toDouble();
+
+      //Calucluate modulation
+      temp_difference = control_ch_setpoint - heater_temp;
+      //Check if 60 seconds have passed since last update
+      unsigned long now = millis();
+      if (now - last_modulation_update > 60000 ) {
+        //Check if difference is > upper limit
+        if (temp_difference > upper_limit) { set_modulation = 100.00; }
+        //Check if diffeence is < lower limit
+        if (temp_difference < lower_limit ) { set_modulation =  0.00; }
+        //Check if differnce is between lower and upper limit
+        if (temp_difference >= lower_limit && temp_difference <= upper_limit ) {
+          set_modulation = temp_difference / (upper_limit - lower_limit) * 100;
+        }
+        //Publish the received calculation to MQTT
+        String msg_full = "Request: " + String(control_ch_setpoint,2) + " Heater flow: " + String(heater_temp,2) + " Difference:" + String(temp_difference,2) + " Set Modulation: " + String(set_modulation,2) ;
+        snprintf (msg, MSG_BUFFER_SIZE, msg_full.c_str());
+        client.publish("ecv/thermostat/rawdata/modulation", msg);
+        //Reset timer
+        last_modulation_update = millis();
+      }
     }
 
     //Check the ID 16 Room setpoint
